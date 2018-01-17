@@ -35,7 +35,6 @@ string twosComp(string input) {
 		}
 		i--;
 	}
-
 	return input;
 }
 
@@ -64,16 +63,20 @@ int valueOf(string input) {
 
 int main() {
 
-	cout << valueOf("1010101111001010") << endl;
-	cout << valueOf("0011111111000011") << endl;
-	cout << valueOf("1111111111111111") << endl;
-	cout << valueOf("0000000000000000") << endl;
-	cout << valueOf("1000000000000000") << endl;
-	cout << valueOf("1000000000000001") << endl;
-	cout << valueOf("0000000000000001") << endl;
-	cout << valueOf("0000111100001111") << endl;
-	cout << valueOf("0101010101010101") << endl;
-	cout << valueOf("1010101010101010") << endl;
+	cout << "1010101111001010b = " << valueOf("1010101111001010") << endl;
+	cout << "0011111111000011b = " << valueOf("0011111111000011") << endl;
+	cout << "1111111111111111b = " << valueOf("1111111111111111") << endl;
+	cout << "0000000000000000b = " << valueOf("0000000000000000") << endl;
+	cout << "1000000000000000b = " << valueOf("1000000000000000") << endl;
+	cout << "1000000000000001b = " << valueOf("1000000000000001") << endl;
+	cout << "0000000000000001b = " << valueOf("0000000000000001") << endl;
+	cout << "0000111100001111b = " << valueOf("0000111100001111") << endl;
+	cout << "0101010101010101b = " << valueOf("0101010101010101") << endl;
+	cout << "1010101010101010b = " << valueOf("1010101010101010") << endl;
+
+	cout << "Press any key to continue . . ." << endl;
+
+	cin.get();
 
 	return 0;
     
