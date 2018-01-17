@@ -9,21 +9,31 @@
 using namespace std;
 
 string twosComp(string input) {
+	// flip bits
 	for(int i = 0; i < 16; i++) {
 		if(input[i] == '1') { input[i] = '0'; }
 		else { input[i] = '1'; }
 	}
-	
+
 	// Add 1
-	int i = 15;
-	int carry = 1;
-	while(carry != 0) {
-		if(input[i] == '0') { 
+	bool carry;
+	int i = 14;
+	if(input[15] == '1') {
+		carry = true;
+		input[15] = '0';
+	} else {
+		carry = false;
+		input[15] = '1';
+	}
+
+	while(carry && i >= 0) {
+		if(input[i] == '0') {
 			input[i] = '1';
-			carry = 0;
+			carry = false;
 		} else {
-			carry = 1;
+			input[i] = '0';
 		}
+		i--;
 	}
 
 	return input;
@@ -38,12 +48,11 @@ int valueOf(string input) {
 	if(signBit == '1') { 
 		input = twosComp(input);
 		sign = -1;
-		cout << "TWOCOMP: " << input << endl;
 	}
 
-	int exp = 14;
+	int exp = 15;
 	// loop thru string backwards
-	for(int i = 1; i < 16; i++) {
+	for(int i = 0; i < 16; i++) {
 		if(input[i] == '1') {
 			value += pow(2, exp);
 		}
@@ -55,9 +64,16 @@ int valueOf(string input) {
 
 int main() {
 
-	string input;
-	getline(cin, input);
-	cout << valueOf(input) << "\n";
+	cout << valueOf("1010101111001010") << endl;
+	cout << valueOf("0011111111000011") << endl;
+	cout << valueOf("1111111111111111") << endl;
+	cout << valueOf("0000000000000000") << endl;
+	cout << valueOf("1000000000000000") << endl;
+	cout << valueOf("1000000000000001") << endl;
+	cout << valueOf("0000000000000001") << endl;
+	cout << valueOf("0000111100001111") << endl;
+	cout << valueOf("0101010101010101") << endl;
+	cout << valueOf("1010101010101010") << endl;
 
 	return 0;
     
