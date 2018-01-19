@@ -94,11 +94,20 @@ int valueOf(string input) {
 
 int main() {
 
-    string bin = hexToBinary("ABCD0000");
-    cout << "Binary  : " << bin << endl;
+	cout << "44444444h = " << valueOf(hexToBinary("44444444")) << endl;
+	cout << "00FF00FFh = " << valueOf(hexToBinary("00FF00FF")) << endl;
+	cout << "12345678h = " << valueOf(hexToBinary("12345678")) << endl;
+	cout << "ABCD0000h = " << valueOf(hexToBinary("ABCD0000")) << endl;
+	cout << "00000000h = " << valueOf(hexToBinary("00000000")) << endl;
+	cout << "11111111h = " << valueOf(hexToBinary("11111111")) << endl;
+	cout << "99990ABCh = " << valueOf(hexToBinary("99990ABC")) << endl;
+	cout << "ABCDEF00h = " << valueOf(hexToBinary("ABCDEF00")) << endl;
+	cout << "ABB10000h = " << valueOf(hexToBinary("ABB10000")) << endl;
+	cout << "FFFFFFFFh = " << valueOf(hexToBinary("FFFFFFFF")) << endl;
 
-    int dec = valueOf(bin);
-    cout << "Decimal : " << dec << endl;
+	cout << "Press any key to continue . . ." << endl;
+
+	cin.get();
 
     return 0;
 }
