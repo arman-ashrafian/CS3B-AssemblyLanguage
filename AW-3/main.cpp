@@ -49,7 +49,9 @@ string intToBinary(int num) {
     // negative
     else {
         // get positive binary
-        string bits = intToBinary(num * -1);
+        // HACK: -2147483648 * -1 causes overflow so this is the fix
+        string bits = num == -2147483648 ? "10000000000000000000000000000000" :
+                                           intToBinary(num * -1);
 
         // flip bits
         flipBits(bits);
@@ -113,13 +115,12 @@ int main() {
     cout << "         -1 = " << binToHex(intToBinary(-1)) << 'h' << endl;
     cout << "    1000000 = " << binToHex(intToBinary(1000000)) << 'h' << endl;
     cout << " 2147483647 = " << binToHex(intToBinary(2147483647)) << 'h' << endl;
-    // cout << "-2147483648 = " << binToHex(intToBinary(-2147483648)) << 'h' << endl;
+    cout << "-2147483648 = " << binToHex(intToBinary(-2147483648)) << 'h' << endl;
     cout << "  268435456 = " << binToHex(intToBinary(268435456)) << 'h' << endl;
     cout << "   16777216 = " << binToHex(intToBinary(16777216)) << 'h' << endl;
     cout << "    1048576 = " << binToHex(intToBinary(1048576)) << 'h' << endl;
     cout << "      65536 = " << binToHex(intToBinary(65536)) << 'h' << endl;
     cout << "         16 = " << binToHex(intToBinary(16)) << 'h' << endl;
-
 
     cout << "Press any key to continue . . .";
     cin.get();
