@@ -23,10 +23,10 @@ string intToString(int number)
 void flipBits(string &in) {
     string out;
 
-	for(int i = 0; i < in.size(); i++) {
-		if(in[i] == '1') { in[i] = '0'; }
-		else { in[i] = '1'; }
-	}
+    for(int i = 0; i < in.size(); i++) {
+        if(in[i] == '1') { in[i] = '0'; }
+        else { in[i] = '1'; }
+        }
 }
 
 string intToBinary(int num) {
