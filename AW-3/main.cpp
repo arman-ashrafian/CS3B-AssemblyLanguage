@@ -20,6 +20,15 @@ string intToString(int number)
   return oss.str();
 }
 
+void flipBits(string &in) {
+    string out;
+
+	for(int i = 0; i < in.size(); i++) {
+		if(in[i] == '1') { in[i] = '0'; }
+		else { in[i] = '1'; }
+	}
+}
+
 string intToBinary(int num) {
     string out;
 
@@ -28,26 +37,51 @@ string intToBinary(int num) {
         int rem;
         do {
             rem = num % 2;
-            out += intToString(rem);
+            out = intToString(rem) + out;
             num = num / 2;
         } while(num != 0);
+
+        // ensure 32 bits
+        while(out.size() < 32) {
+            out = "0" + out;
+    }
     }
     // negative
     else {
-        // @TODO
-    }
+        // get positive binary
+        string bits = intToBinary(num * -1);
 
-    // ensure 32 bits
-    while(out.size() < 32) {
-        out = "0" + out;
+        // flip bits
+        flipBits(bits);
+
+        // + 1
+        bool carry;
+        int i = bits.size() - 2;
+        if(bits[i + 1] == '1') {
+            carry = true;
+            bits[i + 1] = '0';
+        } else {
+            carry = false;
+            bits[i + 1] = '1';
+        }
+
+        while(carry && i >= 0) {
+            if(bits[i] == '0') {
+                bits[i] = '1';
+                carry = false;
+            } else {
+                bits[i] = '0';
+            }
+            i--;
+        }
+
+        out = bits;
     }
 
     return out;
 }
 
 string binToHex(string bin) {
-    if(bin.size() % 4 != 0) { return ""; } // ensure multiple of 4
-
     string out;
     map<string, char> hexMap;
 
@@ -61,15 +95,15 @@ string binToHex(string bin) {
     hexMap["0111"] = '7';
     hexMap["1000"] = '8';
     hexMap["1001"] = '9';
-    hexMap["1010"] = 'A';
-    hexMap["1011"] = 'B';
-    hexMap["1100"] = 'C';
-    hexMap["1101"] = 'D';
-    hexMap["1110"] = 'E';
-    hexMap["1111"] = 'F';
+    hexMap["1010"] = 'a';
+    hexMap["1011"] = 'b';
+    hexMap["1100"] = 'c';
+    hexMap["1101"] = 'd';
+    hexMap["1110"] = 'e';
+    hexMap["1111"] = 'f';
 
     for(int i = 0; i < bin.size(); i+=4) {
-        out += hexMap[bin.substr(i, i+4)];
+        out += hexMap[bin.substr(i, 4)];
     }
 
     return out;
@@ -77,8 +111,22 @@ string binToHex(string bin) {
 
 int main() {
 
-    // cout << intToBinary(5) << endl;
-    cout << binToHex("00010100") << endl;
+    cout << "          0 = " << binToHex(intToBinary(0)) << 'h' << endl;
+    cout << "         -1 = " << binToHex(intToBinary(-1)) << 'h' << endl;
+    cout << "    1000000 = " << binToHex(intToBinary(1000000)) << 'h' << endl;
+    cout << " 2147483647 = " << binToHex(intToBinary(2147483647)) << 'h' << endl;
+    // cout << "-2147483648 = " << binToHex(intToBinary(-2147483648)) << 'h' << endl;
+    cout << "  268435456 = " << binToHex(intToBinary(268435456)) << 'h' << endl;
+    cout << "   16777216 = " << binToHex(intToBinary(16777216)) << 'h' << endl;
+    cout << "    1048576 = " << binToHex(intToBinary(1048576)) << 'h' << endl;
+    cout << "      65536 = " << binToHex(intToBinary(65536)) << 'h' << endl;
+    cout << "         16 = " << binToHex(intToBinary(16)) << 'h' << endl;
+
+
+
+
+    cout << "Press any key to continue . . .";
+    cin.get();
 
     return 0;
 }
