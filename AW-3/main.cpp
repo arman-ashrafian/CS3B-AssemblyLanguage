@@ -26,7 +26,7 @@ void flipBits(string &in) {
     for(int i = 0; i < in.size(); i++) {
         if(in[i] == '1') { in[i] = '0'; }
         else { in[i] = '1'; }
-        }
+    }
 }
 
 string intToBinary(int num) {
@@ -44,7 +44,7 @@ string intToBinary(int num) {
         // ensure 32 bits
         while(out.size() < 32) {
             out = "0" + out;
-    }
+        }
     }
     // negative
     else {
@@ -74,10 +74,8 @@ string intToBinary(int num) {
             }
             i--;
         }
-
         out = bits;
     }
-
     return out;
 }
 
@@ -121,8 +119,6 @@ int main() {
     cout << "    1048576 = " << binToHex(intToBinary(1048576)) << 'h' << endl;
     cout << "      65536 = " << binToHex(intToBinary(65536)) << 'h' << endl;
     cout << "         16 = " << binToHex(intToBinary(16)) << 'h' << endl;
-
-
 
 
     cout << "Press any key to continue . . .";
