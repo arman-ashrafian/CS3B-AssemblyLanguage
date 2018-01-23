@@ -13,6 +13,10 @@
 
 using namespace std;
 
+/* GLOBAL Binary -> Hex map */
+map<string, char> hexMap;
+/***************************/
+
 string intToString(int number)
 {
   std::ostringstream oss;
@@ -49,7 +53,7 @@ string intToBinary(int num) {
     // negative
     else {
         // get positive binary
-        // HACK: -2147483648 * -1 causes overflow so this is the fix
+        // HACK: -2147483648 * -1 causes overflow
         string bits = num == -2147483648 ? "10000000000000000000000000000000" :
                                            intToBinary(num * -1);
 
@@ -57,22 +61,15 @@ string intToBinary(int num) {
         flipBits(bits);
 
         // + 1
-        bool carry;
-        int i = bits.size() - 2;
-        if(bits[i + 1] == '1') {
-            carry = true;
-            bits[i + 1] = '0';
-        } else {
-            carry = false;
-            bits[i + 1] = '1';
-        }
-
+        bool carry = true;
+        int i = bits.size() - 1;
         while(carry && i >= 0) {
-            if(bits[i] == '0') {
-                bits[i] = '1';
-                carry = false;
-            } else {
+            if(bits[i] == '1') {
+                carry = true;
                 bits[i] = '0';
+            } else {
+                carry = false;
+                bits[i] = '1';
             }
             i--;
         }
@@ -83,8 +80,15 @@ string intToBinary(int num) {
 
 string binToHex(string bin) {
     string out;
-    map<string, char> hexMap;
 
+    for(int i = 0; i < bin.size(); i+=4) {
+        out += hexMap[bin.substr(i, 4)];
+    }
+
+    return out;
+}
+
+int main() {
     hexMap["0000"] = '0';
     hexMap["0001"] = '1';
     hexMap["0010"] = '2';
@@ -101,15 +105,6 @@ string binToHex(string bin) {
     hexMap["1101"] = 'd';
     hexMap["1110"] = 'e';
     hexMap["1111"] = 'f';
-
-    for(int i = 0; i < bin.size(); i+=4) {
-        out += hexMap[bin.substr(i, 4)];
-    }
-
-    return out;
-}
-
-int main() {
 
     cout << "          0 = " << binToHex(intToBinary(0)) << 'h' << endl;
     cout << "         -1 = " << binToHex(intToBinary(-1)) << 'h' << endl;
