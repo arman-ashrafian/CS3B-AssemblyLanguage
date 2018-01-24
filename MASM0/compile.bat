@@ -1,4 +1,4 @@
 set projectName=hello
-\masm32\bin\ml /c /Zd /coff %projectName%.asm
-\masm32\bin\Link /SUBSYSTEM:CONSOLE %projectName%.obj
+ml /c /Zd /coff /Fl %projectName%.asm
+Link /SUBSYSTEM:CONSOLE %projectName%.obj
 %projectName%.exe

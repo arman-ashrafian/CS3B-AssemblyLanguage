@@ -12,6 +12,7 @@ includelib \masm32\lib\masm32.lib
 
 .code
     main:
+        mov eax, 0FFFFh
         invoke StdOut, addr message
         invoke ExitProcess, 0
     end main
