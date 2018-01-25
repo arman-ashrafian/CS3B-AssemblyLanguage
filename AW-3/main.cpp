@@ -20,7 +20,7 @@ map<string, char> hexMap;
 string intToString(int number)
 {
   std::ostringstream oss;
-  oss<< number;
+  oss << number;
   return oss.str();
 }
 
@@ -80,11 +80,9 @@ string intToBinary(int num) {
 
 string binToHex(string bin) {
     string out;
-
     for(int i = 0; i < bin.size(); i+=4) {
         out += hexMap[bin.substr(i, 4)];
     }
-
     return out;
 }
 
