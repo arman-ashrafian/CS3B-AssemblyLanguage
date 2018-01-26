@@ -8,11 +8,13 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-    message db "WASSAP ASSEMBLY", 0
+    message db "Program Finished",0
 
 .code
     main:
         mov eax, 0FFFFh
+        mov ax, 34h
+
         invoke StdOut, addr message
         invoke ExitProcess, 0
     end main
