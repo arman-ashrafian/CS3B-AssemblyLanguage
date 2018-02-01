@@ -1,11 +1,9 @@
 ;******************************************************
-; Program Name:		hello.asm
+; Program Name:		main.asm
 ; Programmer: 		Arman Ashrafian
 ; Class:			CS 3B
 ; Date:				1-30-2018
-; Purpose:			Hello world assembly program
-;					to practice assembling, linking,
-;					and debugging. 
+; Purpose:			Test out code for HW 2-1 
 ;*****************************************************
 .386
 .model flat, stdcall
