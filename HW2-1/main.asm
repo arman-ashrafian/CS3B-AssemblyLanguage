@@ -17,14 +17,26 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-message db "Program Finished",0
 
 .code
 main:
-	mov eax, 0FFFFh
-	mov ax, 34h
 
-	invoke StdOut, addr message
+	mov EAX, 10A0FFFFh
+	ADD AL,  0Ah
+	
+	mov EAX, 10A0FFFFh
+	SUB AL,  0Fh
+	
+	mov EAX, 10A0FFFFh
+	ADD AX,  1h
+	
+	mov EAX, 10A0FFFFh
+	ADD EAX, 0FFFFFFFFh
+	
+	mov EAX, 10A0FFFFh
+	ADD AH,  1h
+	
+
+	
 	invoke ExitProcess, 0
 end main
-
