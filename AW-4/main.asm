@@ -40,6 +40,8 @@ int25Hex	 equ 	19h				 	 ; 25 hex
 
 ; 3. Create data def for a DWORD that stores data in Big Endian.
 
+
+; do mov ops
 dBigEndian	 byte 	11h,22h,33h,44h 	 ; store 0x44332211 in big endian
 
 ; 4. Find out if you can declare a DWORD and assign it a (-) value
@@ -48,7 +50,7 @@ dNegative	 dword  -1					 ; try and store a negative value
 
 ; 5. Declare an array of byte & init. it to A,B,C,D,E.
 
-bABCD 		 byte 	"ABCD"				 ; array of bytes
+bABCD 		 byte 	"ABCDE"				 ; array of bytes
 
 ; 6. Declare and uninit. array of 50 signed DWORDs named dArray.
 
