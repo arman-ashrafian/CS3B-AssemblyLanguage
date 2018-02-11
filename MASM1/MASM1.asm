@@ -15,10 +15,11 @@ option casemap :none
 
 ExitProcess proto, dwExitCode:dword
 
-putstring	proto near32 stdcall, lpStringToPrint:dword 
-getstring	proto near32 stdcall, lpStringToGet:dword, dlength:dword
-ascint32	proto near32 stdcall, lpStringToConvert:dword
-hexToChar 	proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
+putstring		proto near32 stdcall, lpStringToPrint:dword 
+getstring		proto near32 stdcall, lpStringToGet:dword, dlength:dword
+ascint32		proto near32 stdcall, lpStringToConvert:dword
+intasc32Comma 	proto near32 stdcall, lpStringToHold:dword,dVal:dword
+hexToChar 		proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
 
 include \masm32\include\kernel32.inc
 include \masm32\include\masm32.inc
@@ -26,26 +27,29 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-	newLine		db		10,0								; ascii new line
+	newLine		db		10,0									; ascii new line
 	
-	strHeader   db "     Name: Arman Ashrafian", 10,
-					 "    Class: CS 3B Assembly Language", 10,	; lab heading
-					 "      Lab: MASM1", 10,
-					 "     Date: 2/13/2018", 10, 0
+	strHeader   db 	"     Name: Arman Ashrafian", 10,
+					"    Class: CS 3B Assembly Language", 10,	; lab heading
+					"      Lab: MASM1", 10,
+					"     Date: 2/13/2018", 10, 0
 							
 	strEnterNum	db "    Enter a whole number: ",0				; prompt user 
 	
+	strAddress	db "The addresses of the 4 ints:",10,0
+	str4Space	db "    ",0
+	
 	; allocate memory for user input
-	strA		dd		?
-	strB		dd		?		
-	strC		dd		?		
-	strD		dd 		?
+	strA		db		12 dup(?)
+	strB		db		12 dup(?)		
+	strC		db		12 dup(?)		
+	strD		db 		12 dup(?)
 	
 	; allocate memory for calculation
 	doubleA		dd		?
 	doubleB		dd		?
 	doubleC		dd		?
-	doubelD		dd		?
+	doubleD		dd		?
 	
 	; allocate memory for 
 
@@ -113,9 +117,45 @@ includelib \masm32\lib\masm32.lib
 
 		
 		; conversions
+		invoke ascint32, addr strA
+		mov doubleA, eax
+		
+		invoke ascint32, addr strB
+		mov doubleB, eax
+		
+		invoke ascint32, addr strC
+		mov doubleC, eax
+		
 		invoke ascint32, addr strD
 		mov doubleD, eax
 		
+		; calculation
+		mov	  eax, doubleA	; mov A into EAX
+		add   eax, doubleB	; add B to EAX
+		mov	  ebx, doubleC	; mov C into EBX
+		add   ebx, doubleD	; add D to EBX
+		sub   eax, ebx		; EAX - EBX
+		
+		; display answer
+		invoke intasc32Comma, addr strA, eax
+		invoke putstring, addr strA
+		invoke putstring, addr newLine
+		invoke putstring, addr newLine
+		
+		invoke putstring, addr strAddress
+		invoke hexToChar, addr strA, addr doubleA, 0
+		invoke putstring, addr strA
+		invoke putstring, addr str4Space
+		invoke hexToChar, addr strB, addr doubleB, 0
+		invoke putstring, addr strB
+		invoke putstring, addr str4Space
+		invoke hexToChar, addr strC, addr doubleC, 0
+		invoke putstring, addr strC
+		invoke putstring, addr str4Space
+		invoke hexToChar, addr strD, addr doubleD, 0
+		invoke putstring, addr strD
+		invoke putstring, addr newLine
+		invoke putstring, addr newLine
 	
         invoke ExitProcess, 0
     end main
