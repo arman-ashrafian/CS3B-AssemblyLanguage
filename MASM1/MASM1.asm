@@ -88,6 +88,7 @@ includelib \masm32\lib\masm32.lib
 		invoke putstring, addr strEnterNum
 		invoke getstring, addr strD, 11
 		invoke putstring, addr newLine
+		invoke putstring, addr newLine
 		
 		; display left-hand signed of calulcation
 		invoke putstring, addr strOParen
