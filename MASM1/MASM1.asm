@@ -18,7 +18,7 @@ ExitProcess proto, dwExitCode:dword
 putstring		proto near32 stdcall, lpStringToPrint:dword 
 getstring		proto near32 stdcall, lpStringToGet:dword, dlength:dword
 ascint32		proto near32 stdcall, lpStringToConvert:dword
-intasc32Comma 	proto near32 stdcall, lpStringToHold:dword,dVal:dword
+intasc32Comma	proto near32 stdcall, lpStringToHold:dword,dVal:dword
 hexToChar 		proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
 
 include \masm32\include\kernel32.inc
@@ -130,11 +130,11 @@ includelib \masm32\lib\masm32.lib
 		mov doubleD, eax
 		
 		; calculation
-		mov	  eax, doubleA	; mov A into EAX
-		add   eax, doubleB	; add B to EAX
-		mov	  ebx, doubleC	; mov C into EBX
-		add   ebx, doubleD	; add D to EBX
-		sub   eax, ebx		; EAX - EBX
+		mov		eax, doubleA	; mov A into EAX
+		add		eax, doubleB	; add B to EAX
+		mov		ebx, doubleC	; mov C into EBX
+		add		ebx, doubleD	; add D to EBX
+		sub		eax, ebx		; EAX - EBX
 		
 		; display answer
 		invoke intasc32Comma, addr strA, eax
