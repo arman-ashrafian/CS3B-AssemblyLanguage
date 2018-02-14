@@ -1,9 +1,9 @@
 ;******************************************************
 ; Program Name:		main.asm
 ; Programmer: 		Arman Ashrafian
-; Class:			CS 3B
-; Date:				1-30-2018
-; Purpose:			Test out code for HW 2-1 
+; Class:		CS 3B
+; Date:			1-30-2018
+; Purpose:		Test out code for HW 2-1 
 ;*****************************************************
 .386
 .model flat, stdcall
