@@ -1,9 +1,9 @@
 ;*******************************************************************
 ; Program Name: 	main.asm
 ; Programmer: 		Arman Ashrafian
-; Class:			CS 3B
-; Date:				2-6-2018
-; Purpose:			Use Chapter 4 Instructions
+; Class:		CS 3B
+; Date:			2-6-2018
+; Purpose:		Use Chapter 4 Instructions
 ;*******************************************************************
 
 .486
@@ -18,7 +18,7 @@ includelib \masm32\lib\masm32.lib
 
 .data
 
-three   DWORD 11112222h   ; dword for question #1
+three   DWORD 11112222h                     ; dword for question #1
 
 iArray  DWORD 10000h,20000h,30000h,40000h   ; dword array for question #7
 
