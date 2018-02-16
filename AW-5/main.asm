@@ -20,7 +20,7 @@ includelib \masm32\lib\masm32.lib
 
 three   DWORD 11112222h                     ; dword for question #1
 
-iArray  DWORD 10000h,20000h,30000h,40000h   ; dword array for question #7
+iArray  DWORD 1,2,3,4,5,6   ; dword array for question #7
 
 .code
     main:
@@ -87,13 +87,14 @@ iArray  DWORD 10000h,20000h,30000h,40000h   ; dword array for question #7
 ;   the sum of its elements using a scale factor with indexed addressing.
 ;**************************************************************************
 
-        mov edi, offset iArray
-        mov ecx, lengthof iArray
-        mov eax, 0
+        int 3 ;
 
+        mov edi, offset iArray         ; EDI = pointer to iArray
+        mov ecx, lengthof iArray       ; ECX = length of array 
+        mov eax, 0                     ; EAX = 0 (accumalator)
         loop1:
-            add eax, edi
-            add edi, TYPE iArray
+            add eax, [edi]             ; EAX = *EDI    
+            add edi, type iArray       ; EDI += 4
         loop loop1
 
         invoke ExitProcess, 0
