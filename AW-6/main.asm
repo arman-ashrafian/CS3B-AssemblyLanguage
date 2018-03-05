@@ -36,5 +36,7 @@ target byte (sizeof source - 1) dup('#'),0  ; Target String
             dec edi                         ; edi--
         loop L1                             ; END L1
 
+		int 3 ;
+
         invoke ExitProcess, 0
     end main
