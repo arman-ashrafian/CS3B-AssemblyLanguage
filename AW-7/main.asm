@@ -1,4 +1,5 @@
-; Playing wit procedures
+; Arman Ashrafian
+; AW - 7
 
 .486
 .model flat, stdcall
@@ -21,7 +22,6 @@ includelib \masm32\lib\masm32.lib
 
 .code
 
-
 main PROC
 
 	; 1. Write a sequence of statements that use only PUSH and POP instructions
@@ -33,7 +33,10 @@ main PROC
 	pop  eax
 	pop  ebx
 	
-	CALL returnPlus3
+	; 4. Write a sequence of statements using indexed addressing that copies an
+	; element in a doubleword array to the previous position in the same array.
+	
+	; TODO
 	
 	INVOKE ExitProcess, 0
 main ENDP
@@ -56,13 +59,25 @@ returnPlus3 ENDP
 
 ; 3. Write an instruction that you could put at the
 ; beginning of an assembly language subroutine that 
-;would reserve space for two integer DWORD variables.
+; would reserve space for two integer DWORD variables.
 
 ;-----------------------------------------------------
 ; localVariables
 ;
 ; reserve space for two local DWORDs
 ;-----------------------------------------------------
+localVariables PROC
+	sub esp, 8  ; room for two DWORDs
+	mov dword ptr [esp], 1000h
+	mov dword ptr [esp+4], 2000h
+	
+	; remove local variables from stack
+	pop eax
+	pop eax
+	
+	ret
+localVariables ENDP
+
 
 END main
 
