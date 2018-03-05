@@ -33,13 +33,37 @@ main PROC
 	pop  eax
 	pop  ebx
 	
-	; 2. Suppose you wanted a subroutine to return to an address that was
-	; 3 bytes higher in memory than the return address currently on the 
-	; stack. Write a sequence of instructions that would be inserted just
-	; before the subroutine’s RET instruction that accomplish this task.
-
-
+	CALL returnPlus3
+	
 	INVOKE ExitProcess, 0
 main ENDP
 
+; 2. Write a sequence of instructions that will return
+; 3 address higher than address currently on the stack
+
+;-----------------------------------------------------
+; returnPlus3
+;
+; returns 3 address higher than the address currently
+; on the stack.
+;-----------------------------------------------------
+returnPlus3 PROC
+	pop  eax 	; EAX = return address
+	add  eax, 3 ; add 3 to return address
+	push eax	; push EAX back onto stack before returning
+	ret
+returnPlus3 ENDP
+
+; 3. Write an instruction that you could put at the
+; beginning of an assembly language subroutine that 
+;would reserve space for two integer DWORD variables.
+
+;-----------------------------------------------------
+; localVariables
+;
+; reserve space for two local DWORDs
+;-----------------------------------------------------
+
 END main
+
+
