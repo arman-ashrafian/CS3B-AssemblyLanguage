@@ -19,9 +19,44 @@ includelib \masm32\lib\masm32.lib
 
 .data
 
-strVal 	byte ?
+array 	dword 4 dup(0)
+
+zeros 	byte 50 dup(?)
 
 .code
+
+    main PROC
+		mov eax, 10
+		mov esi, 0
+		call proc_1
+		add esi, 4
+		add eax, 10
+		mov array[esi], eax
+	
+        INVOKE ExitProcess, 0
+	main ENDP
+	
+	proc_1 PROC
+		call proc_2
+		add esi, 4
+		add eax, 10
+		mov array[esi], eax
+		ret
+	proc_1 ENDP
+	
+	proc_2 PROC
+		call proc_3
+		add esi, 4
+		add eax, 10
+		mov array[esi], eax
+		ret
+	proc_2 ENDP
+	
+	proc_3 PROC
+		mov array[esi], eax
+		ret
+	proc_3 ENDP
+	
 	; recieves eax, ebx, ecx
 	; eax = sum
 	sumOfThree PROC
@@ -29,19 +64,6 @@ strVal 	byte ?
 		add eax, ecx
 		ret
 	sumOfThree ENDP
-
-    main PROC
-		mov eax, 4
-		mov ebx, 5
-		mov ecx, 6
-		
-		; get sum
-		CALL sumOfThree
-		
-		; output sum of three result
-		INVOKE intasc32Comma, addr strVal, eax
-		INVOKE putstring, addr strVal
 	
-        INVOKE ExitProcess, 0
-	main ENDP
+	
 	END main
