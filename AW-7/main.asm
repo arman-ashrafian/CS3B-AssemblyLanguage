@@ -13,7 +13,7 @@
 .stack 4096
 option casemap :none
 
-INCLUDE    ..\Irvine\Irvine32.inc
+INCLUDE    ..\..\Irvine\Irvine32.inc
 
 .data
 
