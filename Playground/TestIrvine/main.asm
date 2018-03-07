@@ -1,12 +1,10 @@
-; Playing wit procedures
+; Testing Irvine Library
 
-.386
-.model flat, stdcall
-.stack 4096
-option casemap :none
+includelib ..\..\Irvine\Kernel32.Lib
+includelib ..\..\Irvine\User32.Lib
+includelib ..\..\Irvine\Irvine32.lib
 
 INCLUDE ..\..\Irvine\Irvine32.inc
-INCLUDE ..\..\Irvine\macros.inc
 
 .data
 str1 BYTE "Sample string, in color",0dh,0ah,0
