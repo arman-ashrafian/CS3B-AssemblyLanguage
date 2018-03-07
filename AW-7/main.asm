@@ -1,8 +1,8 @@
 ;******************************************************
 ; Program Name: 	main.asm
 ; Programmer: 		Arman Ashrafian
-; Class:					CS 3B
-; Date:					3-6-2018
+; Class:		CS 3B
+; Date:			3-6-2018
 ; Purpose:	
 ;	AW-7 Questions #1-4
 ;*****************************************************
@@ -82,9 +82,9 @@ returnPlus3 ENDP
 ;-----------------------------------------------------
 localVariables PROC
 	mov  eax, 1000h
-	push eax				; move 1000h onto stack
+	push eax		; move 1000h onto stack
 	mov  eax, 2000h
-	push eax				; move 2000h onto stack
+	push eax		; move 2000h onto stack
 	
 	; remove local variables from stack
 	pop eax
