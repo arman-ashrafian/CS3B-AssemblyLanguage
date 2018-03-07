@@ -56,7 +56,7 @@ main PROC
 	call Clrscr
 	
 	;******************************************
-	; 5b
+	; 5b. Display return address of procedure
 	;******************************************
 	
 	call displayReturnAddress
