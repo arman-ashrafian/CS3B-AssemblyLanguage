@@ -13,21 +13,12 @@
 .stack 4096
 option casemap :none
 
-; Function Prototypes
-ExitProcess 	proto, dwExitCode:dword
-putstring		proto near32 stdcall, lpStringToPrint:dword 
-getstring		proto near32 stdcall, lpStringToGet:dword, dlength:dword
-intasc32Comma	proto near32 stdcall, lpStringToHold:dword,dVal:dword
-
-
-include \masm32\include\kernel32.inc
-include \masm32\include\masm32.inc
-includelib \masm32\lib\kernel32.lib
-includelib \masm32\lib\masm32.lib
+INCLUDE    ..\Irvine\Irvine32.inc
 
 .data
 
 myArray dword 100h, 200h, 300h, 400h, 500h ; dword array for #4
+myName byte "Arman Ashrafian",10,13,0
 zeros   dword 50 dup(?) ; make memory look nice in OllyDbg
 
 .code
@@ -36,12 +27,12 @@ main PROC
 
 	; 1. Write a sequence of statements that use only PUSH and POP instructions
 	; to exchange the values in the EAX and EBX registers.
-	mov EAX, 512
-	mov EBX, 1024
+	mov  eax, 512
+	mov  ebx, 1024
 	push eax
 	push ebx
-	pop  eax
-	pop  ebx
+	pop   eax
+	pop   ebx
 	
 	; 4. Write a sequence of statements using indexed addressing that copies an
 	; element in a doubleword array to the previous position in the same array.
@@ -51,6 +42,15 @@ main PROC
 	mov edx,myArray[esi*4]	; mov myArray[element] to edx
 	mov myArray[edi*4],edx	; mov edx to previous position
 
+	mov	ax, blue
+	call	SetTextColor
+	
+	mov	edx,OFFSET myName
+	call	WriteString
+	
+	; reset back to green text
+	mov ax, green
+	call SetTextColor
 	
 	INVOKE ExitProcess, 0
 main ENDP
@@ -81,9 +81,10 @@ returnPlus3 ENDP
 ; reserve space for two local DWORDs
 ;-----------------------------------------------------
 localVariables PROC
-	sub esp, 8  ; room for two DWORDs
-	mov dword ptr [esp], 1000h
-	mov dword ptr [esp+4], 2000h
+	mov  eax, 1000h
+	push eax				; move 1000h onto stack
+	mov  eax, 2000h
+	push eax				; move 2000h onto stack
 	
 	; remove local variables from stack
 	pop eax
