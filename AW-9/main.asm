@@ -15,10 +15,10 @@ INCLUDE    ..\..\Irvine\Irvine32.inc
 
 .data
 
-strALequals	byte "AL = ",0
-strIs 				byte " is ",0
-strIsEqual		byte "= 0",10,0
-strNotEqual 	byte "!= 0",10,0
+strALequals   byte "AL = ",0
+strIs             byte " is ",0
+strIsEqual     byte "= 0",10,0
+strNotEqual   byte "!= 0",10,0
 
 .code
 main PROC
