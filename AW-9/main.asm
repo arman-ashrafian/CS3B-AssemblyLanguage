@@ -199,5 +199,4 @@ WriteNewLine PROC
 	call WriteChar	; write newline
 	ret
 WriteNewLine ENDP
-
 end main
