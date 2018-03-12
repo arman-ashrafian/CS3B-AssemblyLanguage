@@ -17,14 +17,21 @@ INCLUDE    ..\..\Irvine\Irvine32.inc
 strNum1		  byte "1. ",0
 strNum2		  byte "2. ",0
 strNum3		  byte "3. ",0	
+strNum4		  byte "4. ",0
 strALequals   byte "AL = ",0
 strIs         byte " is ",0
 strIsEqual    byte "= 0",10,0
 strNotEqual   byte "!= 0",10,0
-strXEquls	  byte "X = ",0
+strXEquals	  byte "X = ",0
 
 val1		  dword 15h
-valX		  dword ? 
+valX		  dword ?
+
+; #4 vars
+valA dword ?
+valB dword ?
+valN dword ?
+
 
 .code
 main PROC
@@ -74,27 +81,29 @@ main PROC
 	;else 
 	;	X = 2;
 	;******************************************************
+
 	mov ecx, 20h	; set initial conditions
 	mov edx, 0EFh
 
-	cmp val1, ecx	; val1 > ecx ?
-	jna L1			; no
-	cmp ecx, edx	; ecx > edx ?
-	jna L1			; no
+	cmp val1, ecx
+	jna L1			; val1 < ecx
+	cmp ecx, edx
+	jna L1			; ecx < edx
 
 	mov valX, 1		; valX = 1
 	jmp next
-	
+
 	L1: mov valX, 2	; valX = 2
 	next:
 	mov edx, offset strNum2
 	call WriteString		; write "2. "
-	mov edx, offset strXEquls
+	mov edx, offset strXEquals
 	call WriteString		; write "X = "
 	mov ebx, type byte
 	mov eax, valX
 	call WriteHexB			; write value of X
 	call WriteNewLine
+
 	;******************************************************
 	; 3. Implement psuedocode using short-circuit eval
 	; and display "3. X = #".
@@ -104,7 +113,28 @@ main PROC
 	; else
 	; 	X = 2
 	;******************************************************
-	
+	mov ecx, 20h	; set initial conditions
+	mov ebx, 0EFh
+
+	cmp ebx, ecx
+	ja true			; ebx > ecx
+	cmp ebx, val1
+	ja true			; ebx > val1
+
+	mov valX, 2
+	jmp next2
+
+	true: mov valX, 1
+	next2:
+	mov edx, offset strNum3
+	call WriteString
+	mov edx, offset strXEquals
+	call WriteString
+	mov ebx, type byte
+	mov eax, valX
+	call WriteHexB
+	call WriteNewLine
+
 	;******************************************************
 	; 4. Implement psuedocode, 
 	;
@@ -123,14 +153,47 @@ main PROC
 	;	}
 	;}
 	;******************************************************
-	
-	
-	
-	
+	mov valA, 5
+	mov valB, 6
+	mov valN, 4
+
+	mov edx, offset strNum4
+	call WriteString
+	call WriteNewLine
+
+	whileloop:
+		cmp valN, 0
+		jbe loopdone
+
+		cmp valN, 3
+		je else_block
+
+		mov eax, val1
+		cmp eax, valA
+		jb true_if
+		cmp eax, valB
+		ja true_if
+
+		true_if:
+		dec valN
+		dec valN
+		mov eax, valN
+		call WriteInt
+		call WriteNewLine
+		jmp nextloop
+		else_block:
+		dec valN
+		mov eax, valN
+		call WriteInt
+		call WriteNewLine
+
+		nextloop:
+		jmp whileloop
+	loopdone:
     invoke ExitProcess, 0
 main ENDP
 
-/** Write New Line **/
+; Write New Line
 WriteNewLine PROC
 	mov eax, 10
 	call WriteChar	; write newline
