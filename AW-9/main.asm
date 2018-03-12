@@ -14,16 +14,20 @@ option casemap :none
 INCLUDE    ..\..\Irvine\Irvine32.inc
 
 .data
-strNum1		  byte "1. ",0
-strNum2		  byte "2. ",0
-strNum3		  byte "3. ",0	
-strNum4		  byte "4. ",0
+strMyName     byte "Arman Ashrfian", 0
+strAssign     byte "Assignment AW-9",0
+
+strNum1       byte "1. ",0
+strNum2       byte "2. ",0
+strNum3       byte "3. ",0	
+strNum4       byte "4. ",0
 strALequals   byte "AL = ",0
 strIs         byte " is ",0
 strIsEqual    byte "= 0",10,0
 strNotEqual   byte "!= 0",10,0
-strXEquals	  byte "X = ",0
+strXEquals    byte "X = ",0
 
+; #2 & #3 vars
 val1		  dword 15h
 valX		  dword ?
 
@@ -32,11 +36,25 @@ valA dword ?
 valB dword ?
 valN dword ?
 
-
 .code
 main PROC
 
 	call Clrscr	; clear screen
+
+	mov ax, lightCyan	; set heading font color
+	call SetTextColor
+
+	; Display Name & Assignment
+	mov edx, offset strMyName
+	call WriteString
+	call WriteNewLine
+	mov edx, offset strAssign
+	call WriteString
+	call WriteNewLine
+	call WriteNewLine
+
+	mov ax, lightMagenta ; set font color
+	call SetTextColor
 	
 	;******************************************************
 	; 1. Write instructions that sets AL to 8Eh, then
@@ -103,6 +121,7 @@ main PROC
 	mov eax, valX
 	call WriteHexB			; write value of X
 	call WriteNewLine
+	call WriteNewLine
 
 	;******************************************************
 	; 3. Implement psuedocode using short-circuit eval
@@ -121,11 +140,12 @@ main PROC
 	cmp ebx, val1
 	ja true			; ebx > val1
 
-	mov valX, 2
+	mov valX, 2     ; else
 	jmp next2
 
-	true: mov valX, 1
-	next2:
+	true: mov valX, 1  ; (ebx > ecx) || (ebx < val1)
+	next2:	
+	; display value of X				
 	mov edx, offset strNum3
 	call WriteString
 	mov edx, offset strXEquals
@@ -133,6 +153,7 @@ main PROC
 	mov ebx, type byte
 	mov eax, valX
 	call WriteHexB
+	call WriteNewLine
 	call WriteNewLine
 
 	;******************************************************
@@ -153,43 +174,49 @@ main PROC
 	;	}
 	;}
 	;******************************************************
-	mov valA, 5
+	
+	mov valA, 5  ; set initial conditions
 	mov valB, 6
 	mov valN, 4
 
+	; Write "4.\n"
 	mov edx, offset strNum4
 	call WriteString
 	call WriteNewLine
 
-	whileloop:
-		cmp valN, 0
-		jbe loopdone
+	whileloop:          ; while n > 0
+		cmp valN, 0		
+		jbe loopdone	; jmp if n <= 0
 
-		cmp valN, 3
-		je else_block
+		cmp valN, 3		; n != 0 ?
+		je else_block	; false
 
-		mov eax, val1
-		cmp eax, valA
-		jb true_if
-		cmp eax, valB
-		ja true_if
+		mov eax, val1	; mov val to reg for cmp
+
+		cmp eax, valA	; n < A ?
+		jb true_if		; true
+		cmp eax, valB	; n > B
+		ja true_if		; true
 
 		true_if:
-		dec valN
-		dec valN
-		mov eax, valN
-		call WriteInt
+		dec valN		; n--
+		dec valN		; n--
+		mov eax, valN   
+		call WriteInt	; display n
 		call WriteNewLine
 		jmp nextloop
 		else_block:
-		dec valN
+		dec valN		; n--
 		mov eax, valN
-		call WriteInt
+		call WriteInt	; display n
 		call WriteNewLine
 
 		nextloop:
-		jmp whileloop
+		jmp whileloop	; loop
 	loopdone:
+	call WriteNewLine
+	mov ax, green	
+	call SetTextColor	; reset text color back to green
     invoke ExitProcess, 0
 main ENDP
 
