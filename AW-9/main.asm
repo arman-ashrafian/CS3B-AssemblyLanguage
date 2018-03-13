@@ -14,7 +14,7 @@ option casemap :none
 INCLUDE    ..\..\Irvine\Irvine32.inc
 
 .data
-strMyName     byte "Arman Ashrfian", 0
+strMyName     byte "Arman Ashrafian", 0
 strAssign     byte "Assignment AW-9",0
 
 strNum1       byte "1. ",0
