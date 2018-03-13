@@ -14,12 +14,12 @@
 option casemap :none
 
 ; Function Prototypes
-ExitProcess proto, dwExitCode:dword
-putstring		proto near32 stdcall, lpStringToPrint:dword 
-getstring		proto near32 stdcall, lpStringToGet:dword, dlength:dword
-ascint32		proto near32 stdcall, lpStringToConvert:dword
-intasc32Comma	proto near32 stdcall, lpStringToHold:dword,dVal:dword
-hexToChar 		proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
+ExitProcess             proto, dwExitCode:dword
+putstring               proto near32 stdcall, lpStringToPrint:dword 
+getstring               proto near32 stdcall, lpStringToGet:dword, dlength:dword
+ascint32                proto near32 stdcall, lpStringToConvert:dword
+intasc32Comma           proto near32 stdcall, lpStringToHold:dword,dVal:dword
+hexToChar               proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
 
 include \masm32\include\kernel32.inc
 include \masm32\include\masm32.inc
@@ -27,30 +27,30 @@ includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-	newLine		db		10,0									; ascii new line
+	newLine         db      10,0           ; ascii new line
 	
-	strHeader   db 	"     Name: Arman Ashrafian", 10,
-					"    Class: CS 3B Assembly Language", 10,	; lab heading
-					"      Lab: MASM1", 10,
-					"     Date: 2/13/2018", 10, 0
+	strHeader       db      "     Name: Arman Ashrafian", 10,
+                                "    Class: CS 3B Assembly Language", 10,       ; lab heading
+                                "      Lab: MASM1", 10,
+			        "     Date: 2/13/2018", 10, 0
 							
-	strEnterNum	db "    Enter a whole number: ",0				; prompt user 
+	strEnterNum     db      "    Enter a whole number: ",0                  ; prompt user 
 	
 	strAddress	db "The addresses of the 4 ints:",10,0			; "The address of the four ints:"
 	
-	strTab		db "    ",0										; 4 spaces
+	strTab		db "    ",0                                             ; 4 spaces
 	
 	; allocate memory for user input
-	strA		db		12 dup(?)			; 12 bytes for user input
-	strB		db		12 dup(?)			; 12 bytes for user input
-	strC		db		12 dup(?)			; 12 bytes for user input
-	strD		db 		12 dup(?)			; 12 bytes for user input
+	strA		db		12 dup(?)                               ; 12 bytes for user input
+	strB		db		12 dup(?)                               ; 12 bytes for user input
+	strC		db		12 dup(?)                               ; 12 bytes for user input
+	strD		db 		12 dup(?)                               ; 12 bytes for user input
 	
 	; allocate memory for calculation
-	doubleA		dd		?					; 2 bytes for integer value of user input
-	doubleB		dd		?					; 2 bytes for integer value of user input
-	doubleC		dd		?					; 2 bytes for integer value of user input
-	doubleD		dd		?					; 2 bytes for integer value of user input
+	doubleA		dd		?                                       ; 2 bytes for integer value of user input
+	doubleB		dd		?                                       ; 2 bytes for integer value of user input
+	doubleC		dd		?                                       ; 2 bytes for integer value of user input
+	doubleD		dd		?                                       ; 2 bytes for integer value of user input
 
 	; math characters
 	strOParen	db		"(",0				; open paranthesis
@@ -117,55 +117,46 @@ includelib \masm32\lib\masm32.lib
 		; acint32 take in string and puts integer value
 		; in eax register
 		invoke ascint32, addr strA	; convert
-		mov doubleA, eax			; mov conversion into doubleA
+		mov doubleA, eax                ; mov conversion into doubleA
 		
 		invoke ascint32, addr strB	; convert
-		mov doubleB, eax			; mov conversion into doubleB
+		mov doubleB, eax                ; mov conversion into doubleB
 		
 		invoke ascint32, addr strC	; convert
-		mov doubleC, eax			; mov conversion into doubleC
+		mov doubleC, eax                ; mov conversion into doubleC
 		
 		invoke ascint32, addr strD	; convert
-		mov doubleD, eax			; mov conversion into doubleD
+		mov doubleD, eax                ; mov conversion into doubleD
 		
 		; calculation
-		mov		eax, doubleA	; mov A into EAX
-		add		eax, doubleB	; add B to EAX
-		mov		ebx, doubleC	; mov C into EBX
-		add		ebx, doubleD	; add D to EBX
-		sub		eax, ebx		; EAX - EBX
+		mov		eax, doubleA    ; mov A into EAX
+		add		eax, doubleB    ; add B to EAX
+		mov		ebx, doubleC    ; mov C into EBX
+		add		ebx, doubleD    ; add D to EBX
+		sub		eax, ebx        ; EAX - EBX
 		
 		; display answer
-		invoke intasc32Comma, addr strA, eax			; convert answer to string and mov into strA
-		invoke putstring, addr strA						; display answer
-		invoke putstring, addr newLine					; print newline
-		invoke putstring, addr newLine					; print newline
+		invoke intasc32Comma, addr strA, eax            ; convert answer to string and mov into strA
+		invoke putstring, addr strA                     ; display answer
+		invoke putstring, addr newLine                  ; print newline
+		invoke putstring, addr newLine                  ; print newline
 		
 		; display addresses
-		invoke putstring, addr strAddress				; print "The addresses of the 4 ints:\n"
-		invoke hexToChar, addr strA, addr doubleA, 0	; convert address of double A to string and store in strA
-		invoke putstring, addr strA						; print address of A
-		invoke putstring, addr strTab					; print '\t'
-		invoke hexToChar, addr strB, addr doubleB, 0	; convert address of double B to string and store in strB
-		invoke putstring, addr strB						; print address of B
-		invoke putstring, addr strTab					; print \t'
-		invoke hexToChar, addr strC, addr doubleC, 0	; convert address of double C to string and store in strC
-		invoke putstring, addr strC						; print address of C
-		invoke putstring, addr strTab					; print \t'
-		invoke hexToChar, addr strD, addr doubleD, 0	; convert address of double D to string and store in strD
-		invoke putstring, addr strD						; print address of D
-		invoke putstring, addr newLine					; print newline
-		invoke putstring, addr newLine					; print newline
+		invoke putstring, addr strAddress               ; print "The addresses of the 4 ints:\n"
+		invoke hexToChar, addr strA, addr doubleA, 0    ; convert address of double A to string and store in strA
+		invoke putstring, addr strA                     ; print address of A
+		invoke putstring, addr strTab                   ; print '\t'
+		invoke hexToChar, addr strB, addr doubleB, 0    ; convert address of double B to string and store in strB
+		invoke putstring, addr strB                     ; print address of B
+		invoke putstring, addr strTab                   ; print \t'
+		invoke hexToChar, addr strC, addr doubleC, 0    ; convert address of double C to string and store in strC
+		invoke putstring, addr strC                     ; print address of C
+		invoke putstring, addr strTab                   ; print \t'
+		invoke hexToChar, addr strD, addr doubleD, 0    ; convert address of double D to string and store in strD
+		invoke putstring, addr strD                     ; print address of D
+		invoke putstring, addr newLine                  ; print newline
+		invoke putstring, addr newLine                  ; print newline
 	
-        invoke ExitProcess, 0							; return 0
+        invoke ExitProcess, 0                                   ; return 0
     end main
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
