@@ -39,13 +39,12 @@ valN dword ?
 .code
 main PROC
 
-	call Clrscr	; clear screen
+	call Clrscr               ; clear screen
 
-	mov ax, lightCyan	; set heading font color
+	mov ax, lightCyan         ; set heading font color
 	call SetTextColor
 
-	; Display Name & Assignment
-	mov edx, offset strMyName
+	mov edx, offset strMyName ; Display Name & Assignment
 	call WriteString
 	call WriteNewLine
 	mov edx, offset strAssign
@@ -53,7 +52,7 @@ main PROC
 	call WriteNewLine
 	call WriteNewLine
 
-	mov ax, lightMagenta ; set font color
+	mov ax, lightMagenta       ; set font color
 	call SetTextColor
 	
 	;******************************************************
@@ -66,25 +65,26 @@ main PROC
 	; "1. AL = ## is != 0" depending on the result.
 	;******************************************************
 
-	mov al, 8Eh				; AL = 1000 1110
-	and al, 11111100b		; clear bits 0 & 1
+	mov al, 8Eh                    ; AL = 1000 1110
+	and al, 11111100b              ; clear bits 0 & 1
 	
 	mov edx, offset strNum1
-	call WriteString			; write "1. "
-	mov edx, offset strALequals	; write "AL = "
+	call WriteString               ; write "1. "
+	mov edx, offset strALequals    ; write "AL = "
 	call WriteString
 	mov ebx, type byte
-	call WriteHexB				; display AL contents in hex
+	call WriteHexB                 ; display AL contents in hex
 	mov edx, offset strIs
-	call WriteString			; write " is "
+	call WriteString               ; write " is "
 	
-	jz	L3		; AL == 0
-	jnz	L4		; AL != 0
+	jz	L3                     ; AL == 0
+	jnz	L4                     ; AL != 0
 
-	L3:
+	L3:                            ; if AL == 0
 	mov edx, offset strIsEqual
 	call WriteString
-	L4:
+	
+	L4:                            ; if AL != 0
 	mov edx, offset strNotEqual
 	call WriteString
 	call WriteNewLine
@@ -100,26 +100,26 @@ main PROC
 	;	X = 2;
 	;******************************************************
 
-	mov ecx, 20h	; set initial conditions
+	mov ecx, 20h            ; set initial conditions
 	mov edx, 0EFh
 
 	cmp val1, ecx
-	jna L1			; val1 < ecx
+	jna L1                  ; val1 < ecx
 	cmp ecx, edx
-	jna L1			; ecx < edx
+	jna L1                  ; ecx < edx
 
-	mov valX, 1		; valX = 1
+	mov valX, 1             ; valX = 1
 	jmp next
 
 	L1: mov valX, 2	; valX = 2
 	next:
 	mov edx, offset strNum2
-	call WriteString		; write "2. "
+	call WriteString                ; write "2. "
 	mov edx, offset strXEquals
-	call WriteString		; write "X = "
+	call WriteString                ; write "X = "
 	mov ebx, type byte
 	mov eax, valX
-	call WriteHexB			; write value of X
+	call WriteHexB                  ; write value of X
 	call WriteNewLine
 	call WriteNewLine
 
@@ -132,21 +132,22 @@ main PROC
 	; else
 	; 	X = 2
 	;******************************************************
-	mov ecx, 20h	; set initial conditions
+	mov ecx, 20h            ; set initial conditions
 	mov ebx, 0EFh
 
+	; if (ebx > ecx) OR (ebx > val1)
 	cmp ebx, ecx
-	ja true			; ebx > ecx
+	ja true                 ; ebx > ecx
 	cmp ebx, val1
-	ja true			; ebx > val1
+	ja true                 ; ebx > val1
 
-	mov valX, 2     ; else
+	mov valX, 2             ; else
 	jmp next2
 
 	true: mov valX, 1  ; (ebx > ecx) || (ebx < val1)
-	next2:	
-	; display value of X				
-	mov edx, offset strNum3
+	
+	next2:					
+	mov edx, offset strNum3         ; display value of X
 	call WriteString
 	mov edx, offset strXEquals
 	call WriteString
@@ -164,66 +165,67 @@ main PROC
 	;int n = 4;
 	;cout << "4." << endl;
 	;while n > 0 {
-	;   if n != 3 AND (n < A OR n > B){
-	;		n = n – 2
-	;		cout << n << endl;
-	;	}
-	;	else {
-	;   	n = n – 1
-	;   	cout << n << endl;
-	;	}
+	;  if n != 3 AND (n < A OR n > B){
+	;    n = n – 2
+	;    cout << n << endl;
+	;  }
+	;  else {
+	;    n = n – 1
+	;    cout << n << endl;
+	;  }
 	;}
 	;******************************************************
 	
-	mov valA, 5  ; set initial conditions
+	mov valA, 5                ; set initial conditions
 	mov valB, 6
 	mov valN, 4
 
-	; Write "4.\n"
-	mov edx, offset strNum4
+	mov edx, offset strNum4    ; Write "4.\n"
 	call WriteString
 	call WriteNewLine
 
-	whileloop:          ; while n > 0
+	whileloop:                 ; while n > 0
 		cmp valN, 0		
-		jbe loopdone	; jmp if n <= 0
+		jbe loopdone       ; jmp if n <= 0
 
-		cmp valN, 3		; n != 0 ?
-		je else_block	; false
+		cmp valN, 3        ; n != 0 ?
+		je else_block      ; false
 
-		mov eax, val1	; mov val to reg for cmp
+		mov eax, val1      ; mov val to reg for cmp
 
-		cmp eax, valA	; n < A ?
-		jb true_if		; true
-		cmp eax, valB	; n > B
-		ja true_if		; true
+		cmp eax, valA      ; n < A ?
+		jb true_if         ; true
+		cmp eax, valB      ; n > B
+		ja true_if         ; true
 
 		true_if:
-		dec valN		; n--
-		dec valN		; n--
+		dec valN           ; n--
+		dec valN           ; n--
 		mov eax, valN   
-		call WriteInt	; display n
+		call WriteInt      ; display n
 		call WriteNewLine
 		jmp nextloop
+		
 		else_block:
-		dec valN		; n--
+		dec valN           ; n--
 		mov eax, valN
-		call WriteInt	; display n
+		call WriteInt      ; display n
 		call WriteNewLine
 
 		nextloop:
-		jmp whileloop	; loop
+		jmp whileloop      ; loop
 	loopdone:
 	call WriteNewLine
 	mov ax, green	
-	call SetTextColor	; reset text color back to green
+	call SetTextColor          ; reset text color back to green
     invoke ExitProcess, 0
 main ENDP
 
 ; Write New Line
 WriteNewLine PROC
 	mov eax, 10
-	call WriteChar	; write newline
+	call WriteChar             ; write newline
 	ret
 WriteNewLine ENDP
+
 end main
