@@ -1,10 +1,10 @@
 ;******************************************************
-; Program Name: 	main.asm
-; Programmer: 		Arman Ashrafian
-; Class:				CS 3B
-; Date:				3-13-2018
+; Program Name: main.asm
+; Programmer:   Arman Ashrafian
+; Class:        CS 3B
+; Date:         3-13-2018
 ; Purpose:
-;		Chapter 6 HW: Conditional Processing
+;     Chapter 6 HW: Conditional Processing
 ;*****************************************************
 
 .386
@@ -29,12 +29,12 @@ main PROC
 	; "1. AL = ##" with ## being the actual value.
 	and al, 0Fh
 	
-	mov ebx, type byte		; bits to display	
-	mov edx, offset strALequals	; string to print
-	call WriteString		; print "AL = "
-	call WriteBinB		; print AL bits
+	mov ebx, type byte              ; bits to display	
+	mov edx, offset strALequals     ; string to print
+	call WriteString                ; print "AL = "
+	call WriteBinB                  ; print AL bits
 	mov al, 10
-	call WriteChar		; print newline
+	call WriteChar                  ; print newline
 	
 	
 	;2. Write instructions that calculate the parity of a
