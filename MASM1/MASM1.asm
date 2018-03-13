@@ -21,44 +21,45 @@ ascint32                proto near32 stdcall, lpStringToConvert:dword
 intasc32Comma           proto near32 stdcall, lpStringToHold:dword,dVal:dword
 hexToChar               proto near32 stdcall, lpDestStr:dword, lpSourceStr:dword, dLen:dword
 
+; Include Libraries
 include \masm32\include\kernel32.inc
 include \masm32\include\masm32.inc
 includelib \masm32\lib\kernel32.lib
 includelib \masm32\lib\masm32.lib
 
 .data
-	newLine         db      10,0           ; ascii new line
+	newLine         db      10,0                                           ; ascii new line
 	
 	strHeader       db      "     Name: Arman Ashrafian", 10,
-                                "    Class: CS 3B Assembly Language", 10,       ; lab heading
-                                "      Lab: MASM1", 10,
-			        "     Date: 2/13/2018", 10, 0
+                            "    Class: CS 3B Assembly Language", 10,      ; lab heading
+                            "      Lab: MASM1", 10,
+                            "     Date: 2/13/2018", 10, 0
 							
-	strEnterNum     db      "    Enter a whole number: ",0                  ; prompt user 
+	strEnterNum     db      "    Enter a whole number: ",0                 ; prompt user 
 	
-	strAddress	db "The addresses of the 4 ints:",10,0			; "The address of the four ints:"
+	strAddress	db          "The addresses of the 4 ints:",10,0	           ; "The address of the four ints:"
 	
-	strTab		db "    ",0                                             ; 4 spaces
+	strTab		db          "    ",0                                       ; 4 spaces
 	
 	; allocate memory for user input
-	strA		db		12 dup(?)                               ; 12 bytes for user input
-	strB		db		12 dup(?)                               ; 12 bytes for user input
-	strC		db		12 dup(?)                               ; 12 bytes for user input
-	strD		db 		12 dup(?)                               ; 12 bytes for user input
+	strA		db		12 dup(?)            ; 12 bytes for user input
+	strB		db		12 dup(?)            ; 12 bytes for user input
+	strD		db 		12 dup(?)            ; 12 bytes for user input
+	strC		db		12 dup(?)            ; 12 bytes for user input
 	
 	; allocate memory for calculation
-	doubleA		dd		?                                       ; 2 bytes for integer value of user input
-	doubleB		dd		?                                       ; 2 bytes for integer value of user input
-	doubleC		dd		?                                       ; 2 bytes for integer value of user input
-	doubleD		dd		?                                       ; 2 bytes for integer value of user input
+	doubleA		dd		?                    ; 2 bytes for integer value of user input
+	doubleB		dd		?                    ; 2 bytes for integer value of user input
+	doubleC		dd		?                    ; 2 bytes for integer value of user input
+	doubleD		dd		?                    ; 2 bytes for integer value of user input
 
 	; math characters
-	strOParen	db		"(",0				; open paranthesis
-	strCParen	db		")",0				; closed paranthesis
-	strAdd		db		"+",0				; addition sign
-	strSub		db		"-",0				; subtraction sign
-	strEqual	db		"=>",0				; equal arrow
-	strSpace	db		" ",0				; space
+	strOParen	db		"(",0                ; open paranthesis
+	strCParen	db		")",0                ; closed paranthesis
+	strAdd		db		"+",0                ; addition sign
+	strSub		db		"-",0                ; subtraction sign
+	strEqual	db		"=>",0               ; equal arrow
+	strSpace	db		" ",0                ; space
     
 .code
     main:
@@ -116,16 +117,16 @@ includelib \masm32\lib\masm32.lib
 		; conversions
 		; acint32 take in string and puts integer value
 		; in eax register
-		invoke ascint32, addr strA	; convert
+		invoke ascint32, addr strA      ; convert
 		mov doubleA, eax                ; mov conversion into doubleA
 		
-		invoke ascint32, addr strB	; convert
+		invoke ascint32, addr strB      ; convert
 		mov doubleB, eax                ; mov conversion into doubleB
 		
-		invoke ascint32, addr strC	; convert
+		invoke ascint32, addr strC      ; convert
 		mov doubleC, eax                ; mov conversion into doubleC
 		
-		invoke ascint32, addr strD	; convert
+		invoke ascint32, addr strD      ; convert
 		mov doubleD, eax                ; mov conversion into doubleD
 		
 		; calculation
@@ -157,6 +158,6 @@ includelib \masm32\lib\masm32.lib
 		invoke putstring, addr newLine                  ; print newline
 		invoke putstring, addr newLine                  ; print newline
 	
-        invoke ExitProcess, 0                                   ; return 0
+        invoke ExitProcess, 0                           ; return 0
     end main
 	
