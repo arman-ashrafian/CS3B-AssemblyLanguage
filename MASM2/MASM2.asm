@@ -21,7 +21,7 @@
     ascint32                proto near32 stdcall, lpStringToConvert:dword
     intasc32                proto near32 stdcall, lpStringToHold:dword, dVal:dword
     getche                  proto near32 stdcall  ;returns character in the AL register
-     getch                   proto near32 stdcall  ;returns character in the AL register
+    getch                   proto near32 stdcall  ;returns character in the AL register
     putch                   proto near32 stdcall, bChar:byte
 
 ; Include Libraries
@@ -32,94 +32,144 @@
 
 ; Data Segment
     .data
-    newLine   db      10,0                                                 ; ascii new line
-    strHeader db      "     Name: Arman Ashrafian", 10,
+    newLine   byte      10,0                                                 ; ascii new line
+    strHeader byte      "     Name: Arman Ashrafian", 10,
                       "    Class: CS 3B Assembly Language", 10,            ; lab heading
                       "      Lab: MASM2", 10,
                       "     Date: 3/27/2018", 10, 0
-    strTab    db      "    ",0                                             ; 4 spaces
-    strSpace  db      " ",0                                                ; 1 space
-    strFinish db      "Thanks for using my program... Have a nice life",10,10,0
+    strTab    byte      "    ",0                                             ; 4 spaces
+    strSpace  byte      " ",0                                                ; 1 space
+    strFinish byte      "Thanks for using my program... Have a nice life",10,10,0
 
     ; Prompts/Output
-    strEnterFirstNum  db "Enter your first number:  ",0   ; Prompt for first number
-    strEnterSecondNum db "Etner your second number: ",0   ; Prompt for second number
-    strSumIs          db "The sum is: ",0                 ; Display sum
-    strDifferenceIs   db "The difference is: ",0          ; Display difference
-    strProductIs      db "The product is: ",0             ; Display product
-    strQuotientIs     db "The quotient is: ",0            ; Display quotient
-    strRemainderIs    db "The remainder is: ",0           ; Display remainder
+    strEnterFirstNum  byte "Enter your first number:  ",0   ; Prompt for first number
+    strEnterSecondNum byte "Etner your second number: ",0   ; Prompt for second number
+    strSumIs          byte "The sum is: ",0                 ; Display sum
+    strDifferenceIs   byte "The difference is: ",0          ; Display difference
+    strProductIs      byte "The product is: ",0             ; Display product
+    strQuotientIs     byte "The quotient is: ",0            ; Display quotient
+    strRemainderIs    byte "The remainder is: ",0           ; Display remainder
     
     ; Error Messages
-    strDivideByZero   db "You cannot divide by 0. Thus, there is no quotient or remainder",10,0
-    strInvalidInput   db "INVALID NUMERIC STRING. RE-ENTER VALUE",10,0
-    strOverflow       db "OVERFLOW OCCURED. RE-ENTER VALUE",10,0
-    strOverflowAdd    db "OVERFLOW OCCURED WHEN ADDING",10,0
-    strOverflowSub    db "OVERFLOW OCCURED WHEN SUBTRACTING",10,0
-    strOverflowMul    db "OVERFLOW OCCURED WHEN MULTIPLYING",10,0
-    strOverflowConv   db "OVERFLOW OCCURED WHEN CONVERTING",10,0
+    strDivideByZero   byte "You cannot divide by 0. Thus, there is no quotient or remainder",10,0
+    strInvalidInput   byte "INVALID NUMERIC STRING. RE-ENTER VALUE",10,0
+    strOverflow       byte "OVERFLOW OCCURED. RE-ENTER VALUE",10,0
+    strOverflowAdd    byte "OVERFLOW OCCURED WHEN ADDING",10,0
+    strOverflowSub    byte "OVERFLOW OCCURED WHEN SUBTRACTING",10,0
+    strOverflowMul    byte "OVERFLOW OCCURED WHEN MULTIPLYING",10,0
+    strOverflowConv   byte "OVERFLOW OCCURED WHEN CONVERTING",10,0
 
     ; Input Data
-    dLimitNum         dw 11             ; limit for inputting numeric string
-    dLimitAlpha       dw 79             ; limit for inputting alpha-numeric string
-    dCharCount        dw 0              ; number of character in the dBuffer input buffer
-    fake              db 11 dup("B")    
-    dBuffer           db 11 dup("A")    ; buffer for numeric input (length = 11 bytes)
+    dLimitNum         dword 11             ; limit for inputting numeric string
+    dLimitAlpha       dword 79             ; limit for inputting alpha-numeric string
+    dCharCount        dword 0              ; number of character in the bBuffer input buffer
+    bBuffer           byte  11 dup(0)      ; buffer for numeric input (length = 11 bytes)
+    bBackspaceChar    byte  8              ; ASCII backspace
+    bDeleteChar       byte  20             ; ASCII delete
 
 .code
 ;**********************************************
 ; GetInput
-; - gets user input and stores it in dBuffer
+; - gets user input and stores it in bBuffer
 ;**********************************************
 GetInput PROC
-    mov dCharCount, 0 ; set count to 0
-    mov ecx, 11       ; set loop counter to size of buffer + 1
-    mov ebx, 0        ; clear ebx
+    mov dCharCount, 0       ; set count to 0
+    mov ecx, 11             ; set loop counter to size of buffer + 1
+    mov ebx, 0              ; clear ebx
 
 clearBuffer:
-    mov ebx, ecx        ; move loop counter to ebx
-    dec ebx             ; ebx - 1 
-    mov dBuffer[bx], 0  ; clear buffer starting from the end
-    loop clearBuffer    ; loop if ecx > 0
+    mov ebx, ecx            ; move loop counter to ebx
+    dec ebx                 ; ebx - 1 
+    mov bBuffer[bx], 0      ; clear buffer starting from the end
+    loop clearBuffer        ; loop if ecx > 0
+    
+getChar:    
+    mov eax, 0              ; clear eax for getch
+    call getch              ; get character and store in AL
 
-getChar:
-    mov eax, 0          ; clear eax for getch
-    call getch          ; get character and store in AL
+    cmp al, 13              ; AL == 'ENTER' ?
+    je endInput             ; jump to end if true
 
-    cmp al, 13          ; AL == 'ENTER' ?
-    je endInput         ; jump to end if true
+    cmp al, 8               ; AL == 'BACKSPACE' ?
+    je backspace            ; jump if true
 
-    cmp al, 8           ; AL == 'BACKSPACE' ?
-    je backspace
+    mov edx, dCharCount     ; EDX = number of character in buffer
+    cmp edx, 10             ; EDX == buffer limit - 1 (10 bytes) ?
+    jl stillSpace           ; jump if buffer still has room 
+    jmp getChar             ; jump back to beginning if no more room
 
-    mov edx, dCharCount ; EDX = number of character in buffer
-    cmp edx, dLimitNum  ; EDX == buffer limit (11 bytes) ?
-    jl stillSpace       ; jump if buffer still has room 
-    jmp getChar         ; jump back to beginning if no more room
+stillSpace:
+    mov ebx, dCharCount     ; EBX = buffer character count
+    mov bBuffer[bx], al     ; mov character into buffer
+    invoke putch, al        ; echo character to console
+    inc dCharCount          ; increment character counter
+    jmp getChar             ; jump back to beginning
 
-
-
-backspace:
-    ; TODO
+backspace:                  ; Handle Backspace
+    cmp dCharCount, 0       ; buffer empty ?
+    je getChar              ; jump back to beginning if true (prevents deleting prompt)
+    call Backspace
+    dec dCharCount
+    jmp getChar
 
 endInput:
-    ; TODO
+    cmp bBuffer, 0          ; check if buffer is empty
+    je endProgram           ; end program if true
+    mov bBuffer[10], 0      ; else: add null terminator to end of buffer
     
     ret
 GetInput ENDP
 
+;**********************************************
+; Backspace
+; - prints ASCII codes 8, 34, 8 to do delete 
+;   a char and correctly position cursor
+;**********************************************
+Backspace PROC
+    invoke putch, 8
+    invoke putch, 32
+    invoke putch, 8
+    ret
+Backspace ENDP
+
+;**********************************************
+; NewLine
+; - prints new line
+;**********************************************
+NewLine PROC
+    invoke putstring, addr newLine
+    ret
+NewLine ENDP
+
+;**********************************************
+; CheckInput
+; - checks carry & overflow flag after
+;   ascint32 procedure
+;**********************************************
+CheckInput PROC
+; TODO
+CheckInput ENDP
 
 _start:
     mov eax, 0                                      ; for OllyDebug
-
-    call GetInput
-
     invoke putstring, addr strHeader                ; print header
     invoke putstring, addr newLine                  ; print new line
 
 ; Top of the input loop
 inputTop:
     invoke putstring, addr strEnterFirstNum
+    call GetInput
+    call NewLine
+    invoke ascint32, addr bBuffer
+    call CheckInput
+
+
+
+endProgram:
+    call NewLine                                    ; print newline x2
+    call NewLine
+    invoke putstring, addr strFinish                ; print program finished
+    call NewLine                                    ; print new line
 
     invoke ExitProcess, 0
 end _start                                          ; end program
