@@ -60,12 +60,16 @@
     strOverflowConv   byte "OVERFLOW OCCURED WHEN CONVERTING",10,0
 
     ; Input Data
-    dLimitNum         dword 11             ; limit for inputting numeric string
-    dLimitAlpha       dword 79             ; limit for inputting alpha-numeric string
-    dCharCount        dword 0              ; number of character in the bBuffer input buffer
-    bBuffer           byte  11 dup(0)      ; buffer for numeric input (length = 11 bytes)
-    bBackspaceChar    byte  8              ; ASCII backspace
-    bDeleteChar       byte  20             ; ASCII delete
+    dLimitNum         dword 11          ; limit for inputting numeric string
+    dLimitAlpha       dword 79          ; limit for inputting alpha-numeric string
+    dCharCount        dword 0           ; number of character in the bBuffer input buffer
+    bBuffer           byte  11 dup(0)   ; buffer for numeric input (length = 11 bytes)
+    bBackspaceChar    byte  8           ; ASCII backspace
+    bDeleteChar       byte  20          ; ASCII delete
+    bCurrentInput     byte  0           ; current input field (0 for 1st num, 1 for 2nd num)
+    dNum1             dword ?           ; store num1
+    dNum2             dword ?           ; store num2
+    strResult         byte  11 dup(?)   ; result of arithmetic
 
 .code
 ;**********************************************
@@ -120,11 +124,11 @@ endInput:
     ret
 GetInput ENDP
 
-;**********************************************
+;*********************************************************************
 ; Backspace
-; - prints ASCII codes 8, 34, 8 to do delete 
-;   a char and correctly position cursor
-;**********************************************
+; - prints ASCII codes 8, 34, 8 to do delete a char and correctly
+;   position cursor
+;*********************************************************************
 Backspace PROC
     invoke putch, 8
     invoke putch, 32
@@ -132,23 +136,50 @@ Backspace PROC
     ret
 Backspace ENDP
 
-;**********************************************
+;*********************************************************************
 ; NewLine
 ; - prints new line
-;**********************************************
+;*********************************************************************
 NewLine PROC
     invoke putstring, addr newLine
     ret
 NewLine ENDP
 
-;**********************************************
+;*********************************************************************
 ; CheckInput
-; - checks carry & overflow flag after
-;   ascint32 procedure
-;**********************************************
+; - ensures the ascint32 function properly converts string -> int.
+; - options:
+;            succesful: result in EAX
+;    invalid character: carry flag set
+;             overflow: overflow flag set
+;*********************************************************************
 CheckInput PROC
-; TODO
+    jc invalidChar                          ; invalid character in string
+    jo convOverflow                         ; conversion results in overflow
+    jmp convOk                              ; okay, leave procedure
+invalidChar:
+    invoke putstring, addr strInvalidInput  ; print invalid input
+    jmp decideJmp
+convOverflow:
+    invoke putstring, addr strOverflow      ; print overflow 
+decideJmp:
+    cmp bCurrentInput, 0                    ; currentInput == 1st ?
+    je firstInput                           ; jmp back to first if true
+    jmp secondInput                         ; jmp to second otherwise
+convOk:
+    ret
 CheckInput ENDP
+
+;*********************************************************************
+; PrintResult
+; - converts EAX to string and prints with newline
+;*********************************************************************
+PrintResult PROC
+    invoke intasc32, addr strResult, eax
+    invoke putstring, addr strResult
+    call NewLine
+    ret
+PrintResult ENDP
 
 _start:
     mov eax, 0                                      ; for OllyDebug
@@ -157,12 +188,53 @@ _start:
 
 ; Top of the input loop
 inputTop:
+firstInput:
+    ; Enter First Number
+    mov bCurrentInput, 0
     invoke putstring, addr strEnterFirstNum
     call GetInput
     call NewLine
     invoke ascint32, addr bBuffer
     call CheckInput
+    mov dNum1, eax
+secondInput:
+    ; Enter Second Number
+    mov bCurrentInput, 1
+    invoke putstring, addr strEnterSecondNum
+    call GetInput
+    call NewLine
+    invoke ascint32, addr bBuffer
+    call CheckInput
+    mov dNum2, eax
 
+    ; Addition
+    add eax, dNum1
+    invoke putstring, addr strSumIs
+    call PrintResult
+
+    ; Subtraction
+    mov eax, dNum1
+    sub eax, dNum2
+    invoke putstring, addr strDifferenceIs
+    call PrintResult
+
+    ; Multiplication
+    mov eax, dNum1
+    mul dNum2
+    invoke putstring, addr strProductIs
+    call PrintResult
+
+    ; Division
+    mov eax, dNum1
+    div dNum2
+    invoke putstring, addr strQuotientIs
+    call PrintResult
+    invoke putstring, addr strRemainderIs
+    mov eax, edx
+    call PrintResult
+
+    call NewLine
+    jmp inputTop
 
 
 endProgram:
