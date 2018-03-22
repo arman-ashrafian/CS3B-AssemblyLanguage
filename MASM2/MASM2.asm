@@ -34,9 +34,9 @@
     .data
     newLine   byte      10,0                                                 ; ascii new line
     strHeader byte      "     Name: Arman Ashrafian", 10,
-                      "    Class: CS 3B Assembly Language", 10,            ; lab heading
-                      "      Lab: MASM2", 10,
-                      "     Date: 3/27/2018", 10, 0
+                        "    Class: CS 3B Assembly Language", 10,            ; lab heading
+                        "      Lab: MASM2", 10,
+                        "     Date: 3/27/2018", 10, 0
     strTab    byte      "    ",0                                             ; 4 spaces
     strSpace  byte      " ",0                                                ; 1 space
     strFinish byte      "Thanks for using my program... Have a nice life",10,10,0
