@@ -175,9 +175,9 @@ CheckInput ENDP
 ; - converts EAX to string and prints with newline
 ;*********************************************************************
 PrintResult PROC
-    invoke intasc32, addr strResult, eax
-    invoke putstring, addr strResult
-    call NewLine
+    invoke intasc32, addr strResult, eax            ; convert eax to string 
+    invoke putstring, addr strResult                ; print result
+    call NewLine                                    ; print new line
     ret
 PrintResult ENDP
 
@@ -190,76 +190,74 @@ _start:
 inputTop:
 firstInput:
     ; Enter First Number
-    mov bCurrentInput, 0
-    invoke putstring, addr strEnterFirstNum
-    call GetInput
-    call NewLine
-    invoke ascint32, addr bBuffer
-    call CheckInput
-    mov dNum1, eax
+    mov bCurrentInput, 0                            ; current input = 0
+    invoke putstring, addr strEnterFirstNum         ; print prompt 1
+    call GetInput                                   ; get input and store in buffer
+    call NewLine                                    ; print new line
+    invoke ascint32, addr bBuffer                   ; convert buffer to int & store in eax
+    call CheckInput                                 ; ensure good conversion
+    mov dNum1, eax                                  ; store eax in dNum1
 secondInput:
     ; Enter Second Number
-    mov bCurrentInput, 1
-    invoke putstring, addr strEnterSecondNum
-    call GetInput
-    call NewLine
-    invoke ascint32, addr bBuffer
-    call CheckInput
-    mov dNum2, eax
+    mov bCurrentInput, 1                            ; current input = 1
+    invoke putstring, addr strEnterSecondNum        ; print prompt 2
+    call GetInput                                   ; get input and store in buffer
+    call NewLine                                    ; print new line
+    invoke ascint32, addr bBuffer                   ; convert buffer to int & store in eax
+    call CheckInput                                 ; ensure good conversion
+    mov dNum2, eax                                  ; store eax in dNum2
 
     ; Addition
-    add eax, dNum1
-    jo additionOverflow
-    invoke putstring, addr strSumIs
-    call PrintResult
-    jmp subtraction
+    add eax, dNum1                                  ; EAX = dNum2 + dNum1
+    jo additionOverflow                             ; jump if overflow
+    invoke putstring, addr strSumIs                 ; print sum is string
+    call PrintResult                                ; print sum
+    jmp subtraction                                 ; jump to subtraction
 additionOverflow:
-    invoke putstring, addr strOverflowAdd
+    invoke putstring, addr strOverflowAdd           ; print overflow message
 
 subtraction:
     ; Subtraction
-    mov eax, dNum1
-    sub eax, dNum2
-    jo subtractionOverflow
-    invoke putstring, addr strDifferenceIs
-    call PrintResult
-    jmp multiplication
+    mov eax, dNum1                                  ; EAX = dNum1
+    sub eax, dNum2                                  ; EAX = dNum1 - dNum2
+    jo subtractionOverflow                          ; jump if overflow
+    invoke putstring, addr strDifferenceIs          ; print differnce is string
+    call PrintResult                                ; print difference
+    jmp multiplication                              ; jump to multiplication
 subtractionOverflow:
-    invoke putstring, addr strOverflowSub
+    invoke putstring, addr strOverflowSub           ; print overflow message
 
 multiplication:
     ; Multiplication
-    mov eax, dNum1
-    imul dNum2
-    jo multiplicationOverflow
-    invoke putstring, addr strProductIs
-    call PrintResult
-    jmp division
+    mov eax, dNum1                                  ; EAX = dNum1
+    imul dNum2                                      ; EAX = dNum1 * dNum2
+    jo multiplicationOverflow                       ; jump if overflow
+    invoke putstring, addr strProductIs             ; print product is string
+    call PrintResult                                ; print product
+    jmp division                                    ; jump to division
 multiplicationOverflow:
-    invoke putstring, addr strOverflowMul
+    invoke putstring, addr strOverflowMul           ; print overflow message
 
 division:
     ; Division
-    mov eax, dNum1
-    cdq
-    cmp dNum2, 0
-    je divideByZero
-    idiv dNum2
+    mov eax, dNum1                                  ; EAX = dNum1
+    cdq                                             ; Convert EAX to Quadword
+    cmp dNum2, 0                                    ; check if divisor is 0
+    je divideByZero                                 ; jump if divisor is 0
+    idiv dNum2                                      ; EAX = dNum1/dNum2
 
-    invoke putstring, addr strQuotientIs
-    call PrintResult
-    invoke putstring, addr strRemainderIs
-    mov eax, edx
-    call PrintResult
-    jmp after
+    invoke putstring, addr strQuotientIs            ; print quotient is string
+    call PrintResult                                ; print quotient
+
+    invoke putstring, addr strRemainderIs           ; print remainder is string
+    mov eax, edx                                    ; EAX = remainder
+    call PrintResult                                ; print remainder
+    jmp after                                       ; jump to after
 divideByZero:
-    invoke putstring, addr strDivideByZero
-    jmp after
-
+    invoke putstring, addr strDivideByZero          ; print divide by 0 string
 after:
-    call NewLine
-    jmp inputTop
-
+    call NewLine                                    ; print new line
+    jmp inputTop                                    ; jump back to input 1
 
 endProgram:
     call NewLine                                    ; print newline x2
