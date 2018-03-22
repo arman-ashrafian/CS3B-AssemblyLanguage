@@ -209,30 +209,54 @@ secondInput:
 
     ; Addition
     add eax, dNum1
+    jo additionOverflow
     invoke putstring, addr strSumIs
     call PrintResult
+    jmp subtraction
+additionOverflow:
+    invoke putstring, addr strOverflowAdd
 
+subtraction:
     ; Subtraction
     mov eax, dNum1
     sub eax, dNum2
+    jo subtractionOverflow
     invoke putstring, addr strDifferenceIs
     call PrintResult
+    jmp multiplication
+subtractionOverflow:
+    invoke putstring, addr strOverflowSub
 
+multiplication:
     ; Multiplication
     mov eax, dNum1
-    mul dNum2
+    imul dNum2
+    jo multiplicationOverflow
     invoke putstring, addr strProductIs
     call PrintResult
+    jmp division
+multiplicationOverflow:
+    invoke putstring, addr strOverflowMul
 
+division:
     ; Division
     mov eax, dNum1
-    div dNum2
+    cdq
+    cmp dNum2, 0
+    je divideByZero
+    idiv dNum2
+
     invoke putstring, addr strQuotientIs
     call PrintResult
     invoke putstring, addr strRemainderIs
     mov eax, edx
     call PrintResult
+    jmp after
+divideByZero:
+    invoke putstring, addr strDivideByZero
+    jmp after
 
+after:
     call NewLine
     jmp inputTop
 
