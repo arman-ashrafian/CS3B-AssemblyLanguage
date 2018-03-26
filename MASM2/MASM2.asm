@@ -44,11 +44,11 @@
     ; Prompts/Output
     strEnterFirstNum  byte "Enter your first number:  ",0   ; Prompt for first number
     strEnterSecondNum byte "Etner your second number: ",0   ; Prompt for second number
-    strSumIs          byte "The sum is: ",0                 ; Display sum
-    strDifferenceIs   byte "The difference is: ",0          ; Display difference
-    strProductIs      byte "The product is: ",0             ; Display product
-    strQuotientIs     byte "The quotient is: ",0            ; Display quotient
-    strRemainderIs    byte "The remainder is: ",0           ; Display remainder
+    strSumIs          byte "The sum is ",0                 ; Display sum
+    strDifferenceIs   byte "The difference is ",0          ; Display difference
+    strProductIs      byte "The product is ",0             ; Display product
+    strQuotientIs     byte "The quotient is ",0            ; Display quotient
+    strRemainderIs    byte "The remainder is ",0           ; Display remainder
     
     ; Error Messages
     strDivideByZero   byte "You cannot divide by 0. Thus, there is no quotient or remainder",10,0
