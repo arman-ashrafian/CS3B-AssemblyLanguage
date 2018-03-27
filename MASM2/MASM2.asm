@@ -112,9 +112,9 @@ stillSpace:
 backspace:                  ; Handle Backspace
     cmp dCharCount, 0       ; buffer empty ?
     je getChar              ; jump back to beginning if true (prevents deleting prompt)
-    call Backspace
-    dec dCharCount
-    jmp getChar
+    call Backspace          ; output backspace
+    dec dCharCount          ; decrement character count
+    jmp getChar             ; jump back to top
 
 endInput:
     cmp bBuffer, 0          ; check if buffer is empty
