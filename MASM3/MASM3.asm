@@ -17,7 +17,7 @@
     INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
 
     ; External Procedures
-	extern String_length@0:PROC
+    extern String_length@0:PROC
 
     ; Symplify External Procedure Names
     String_length equ String_length@0
