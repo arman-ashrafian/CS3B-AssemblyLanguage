@@ -18,10 +18,11 @@
 
     ; External Procedures
     extern String_length@0:PROC
+    extern String_equals@0:PROC
 
     ; Symplify External Procedure Names
     String_length equ String_length@0
-
+    String_equals equ String_equals@0
 ; Data Segment
     .data
 
@@ -46,12 +47,18 @@
     strStringStarts1  byte    "<10> String_startsWith_1       ",0
     strStringStarts2  byte    "<11> String_startsWith_2       ",0
     strStringEndWith  byte    "<12> String_endWith            ",0
+    strPrompt1        byte    "String 1: ",0
+    strPrompt2        byte    "String 2: ",0
     strCurrently      byte    "currently: ",0
     strNull           byte    "NULL",0
     strHoldInt        byte    10 dup(?)
     strTrue           byte    "True",0
     strFalse          byte    "False",0
-    
+
+    ; user input (bufffer size - 50 bytes)
+    strUserInput1     byte   50 dup(?)
+    strUserInput2     byte   50 dup(?)
+
     ; testing data
     strMyName byte "Arman",0
 
@@ -87,6 +94,13 @@ PrintMenu PROC
     invoke putstring, addr strStringEndWith 
     call NewLine
     invoke putstring, addr strStars
+    call NewLine
+    invoke putstring, addr strPrompt1
+    invoke getstring, addr strUserInput1, 50
+    call NewLine
+    invoke putstring, addr strPrompt2
+    invoke getstring, addr strUserInput2, 50
+    call NewLine
     ret
 PrintMenu ENDP
 
@@ -103,6 +117,13 @@ _start:
     mov eax, 0                                      ; for OllyDebug
     call Clrscr                                     ; clear screen
     call PrintMenu
+
+
+    push offset strUserInput2
+    push offset strUserInput1
+    call String_equals
+    call DumpRegs
+
     invoke ExitProcess, 0
 
 end _start                                          ; end program
