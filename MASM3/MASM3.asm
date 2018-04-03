@@ -29,9 +29,9 @@
 ; Data Segment
     .data
 
-    newLine   byte      10,0                                                 ; ascii new line
-    strTab    byte      "    ",0                                             ; 4 spaces
-    strSpace  byte      " ",0                                                ; 1 space
+    newLine   byte      10,0        ; ascii new line
+    strTab    byte      "    ",0    ; 4 spaces
+    strSpace  byte      " ",0       ; 1 space
 
     ; menu
     strStars          byte   "***********************************",10,0
@@ -58,6 +58,10 @@
     strHoldInt          byte    10 dup(?)
     strTrue             byte    "True",0
     strFalse            byte    "False",0
+    strLengthOfS1       byte    "Length of string 1: ",0
+    strLengthOfS2       byte    "Length of string 2: ",0
+    strIsEqual          byte    "String are equal (ignoring case)",0
+    strNotEqual         byte    "Strings are not equal",0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)
@@ -74,10 +78,19 @@
 ;**********************************************
 PrintMenu PROC
     invoke putstring, addr strMASMHead
+    
+    ; <1>
     invoke putstring, addr strSetString1
+    invoke putstring, addr strCurrently
+    invoke putstring, addr strString1
     call NewLine
+
+    ; <2>
     invoke putstring, addr strSetString2
+    invoke putstring, addr strCurrently
+    invoke putstring, addr strString2
     call NewLine
+
     invoke putstring, addr strStringLength
     call NewLine
     invoke putstring, addr strStringEquals
@@ -100,12 +113,24 @@ PrintMenu PROC
     call NewLine
     invoke putstring, addr strStars
     call NewLine
+    ret
+PrintMenu ENDP
+
+;*************************************************
+; PromptUser
+; - prompt user and store input in strMenuChoice
+;*************************************************
+PromptUser PROC
     invoke putstring, addr strMenuChoicePrompt
     invoke getstring, addr strMenuChoice, 10
     call NewLine
     ret
-PrintMenu ENDP
+PromptUser ENDP
 
+;*************************************************
+; NewLine
+; - print new line
+;*************************************************
 NewLine PROC
     invoke putstring, addr newLine
     ret 
@@ -121,12 +146,18 @@ _start:
 menuLoop:
     call Clrscr                                     ; clear screen
     call PrintMenu
+loopWithoutMenu:
+    call PromptUser
     invoke ascint32, addr strMenuChoice             ; convert menu choice to int
 
     cmp eax, 1
     je setString1
     cmp eax, 2
     je setString2
+    cmp eax, 3
+    je stringLength
+    cmp eax, 4
+    je stringEqual
 
 setString1:
     invoke putstring, addr strPromptString1
@@ -136,9 +167,44 @@ setString2:
     invoke putstring, addr strPromptString2
     invoke getstring, addr strString2, 50
     jmp done
+stringLength:
+    ; print length of string 1
+    push offset strString1                  ; pass string 1 address
+    call String_length                      ; returns length in eax
+    invoke putstring, addr strLengthOfS1    ; print "length of string 1: "
+    invoke intasc32, addr strHoldInt, eax   ; convert eax to string
+    invoke putstring, addr strHoldInt       ; print length
+    call NewLine                            ; print new line
+    ; print length of string 2
+    push offset strString2                  ; pass string 2 address
+    call String_length                      ; returns length in eax
+    invoke putstring, addr strLengthOfS1    ; print "length of string 2: "
+    invoke intasc32, addr strHoldInt, eax   ; convert eax to string
+    invoke putstring, addr strHoldInt       ; print length
+
+    call NewLine                            ; print new line
+    call NewLine
+    jmp loopWithoutMenu                     ; loop 
+stringEqual:
+    push offset strString2                  ; pass string 2 address
+    push offset strString1                  ; pass string 1 address
+    call String_equals                      ; returns boolean in al
+    
+    cmp al, 1
+    je isEqual                              ; TRUE
+    jmp notEqual                            ; FALSE
+
+    isEqual:
+    invoke putstring, addr strIsEqual
+    call NewLine
+    jmp endOfProc
+    notEqual:
+    invoke putstring, addr strNotEqual
+    call NewLine
+    endOfProc:
+    jmp loopWithoutMenu
 done:
     jmp menuLoop
-
 
     invoke ExitProcess, 0
 
