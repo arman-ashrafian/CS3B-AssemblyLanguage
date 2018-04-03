@@ -50,6 +50,7 @@
     strStringStarts1    byte    "<10> String_startsWith_1       ",0
     strStringStarts2    byte    "<11> String_startsWith_2       ",0
     strStringEndWith    byte    "<12> String_endWith            ",0
+    strQuit             byte    "<13> QUIT                      ",0
     strMenuChoicePrompt byte    "Choice (1-12): ",0
     strPromptString1    byte    "String 1: ",0
     strPromptString2    byte    "String 2: ",0
@@ -60,8 +61,9 @@
     strFalse            byte    "False",0
     strLengthOfS1       byte    "Length of string 1: ",0
     strLengthOfS2       byte    "Length of string 2: ",0
-    strIsEqual          byte    "String are equal (ignoring case)",0
+    strIsEqual          byte    "Strings are equal",0
     strNotEqual         byte    "Strings are not equal",0
+    strInvalidInput     byte    "Invalid Menu Option!",0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)
@@ -111,6 +113,8 @@ PrintMenu PROC
     call NewLine
     invoke putstring, addr strStringEndWith 
     call NewLine
+    invoke putstring, addr strQuit
+    call NewLine
     invoke putstring, addr strStars
     call NewLine
     ret
@@ -158,6 +162,12 @@ loopWithoutMenu:
     je stringLength
     cmp eax, 4
     je stringEqual
+    cmp eax, 5
+    je stringEqualIgnoreCase
+    
+    cmp eax, 13
+    je quit
+    jmp invalidMenuOption
 
 setString1:
     invoke putstring, addr strPromptString1
@@ -202,10 +212,36 @@ stringEqual:
     invoke putstring, addr strNotEqual
     call NewLine
     endOfProc:
+    call NewLine
+    jmp loopWithoutMenu
+stringEqualIgnoreCase:
+    push offset strString2                  ; pass string 2 address
+    push offset strString1                  ; pass string 1 address
+    call String_equalsIgnoreCase            ; returns boolean in al
+    
+    cmp al, 1
+    je isEqual                              ; TRUE
+    jmp notEqual                            ; FALSE
+
+    isEqual2:
+    invoke putstring, addr strIsEqual
+    call NewLine
+    jmp endOfProc
+    notEqual2:
+    invoke putstring, addr strNotEqual
+    call NewLine
+    endOfProc2:
+    call NewLine
+    jmp loopWithoutMenu
+invalidMenuOption:
+    invoke putstring, addr strInvalidInput
+    call NewLine
+    call NewLine
     jmp loopWithoutMenu
 done:
     jmp menuLoop
 
+quit:
     invoke ExitProcess, 0
 
 end _start                                          ; end program
