@@ -53,7 +53,7 @@
     strStringStarts2    byte    "<11> String_startsWith_2       ",0
     strStringEndWith    byte    "<12> String_endWith            ",0
     strQuit             byte    "<13> QUIT                      ",0
-    strMenuChoicePrompt byte    "Choice (1-12): ",0
+    strMenuChoicePrompt byte    "Choice (1-13): ",0
     strPromptString1    byte    "String 1: ",0
     strPromptString2    byte    "String 2: ",0
     strCurrently        byte    "currently: ",0
@@ -152,9 +152,15 @@ _start:
     mov eax, 0                                      ; for OllyDebug
 
 menuLoop:
+    mov eax, cyan
+    call SetTextColor
+
     call Clrscr                                     ; clear screen
     call PrintMenu
 loopWithoutMenu:
+    mov eax, lightGreen
+    call SetTextColor
+
     call PromptUser
     invoke ascint32, addr strMenuChoice             ; convert menu choice to int
 
@@ -259,6 +265,9 @@ done:
     jmp menuLoop
 
 quit:
+    mov eax, green
+    call SetTextColor
+
     invoke ExitProcess, 0
 
 end _start                                          ; end program
