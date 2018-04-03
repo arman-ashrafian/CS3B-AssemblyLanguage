@@ -24,7 +24,7 @@ String_length PROC
     push ebx					; preserve used registers
     push esi 
     mov ebx,[ebp+8]				; set ebx pointer to string
-    mov esi,0					; move esi indexes into the string
+    mov esi,0					; esi = 0
 stLoop: 
     cmp byte ptr[ebx+esi],0	    ; reached the end of the string
     je finished				    ; when yes, string input ends here
@@ -35,7 +35,7 @@ finished:
     pop esi			            ; restore preserved registers
     pop ebx			            ; restore preserved registers
     pop ebp			            ; restore preserved registers
-    RET 4                       ; returns result from eax & clears local stack frame
+    ret 4                       ; returns result from eax & clears local stack frame
 String_length ENDP              ; end String_length function
 
 ;*******************************************************
@@ -153,5 +153,46 @@ return:
     ret 8           ; return & clear local stack
 String_equalsIgnoreCase ENDP
 
+;***************************************************************
+; String_copy(string1:String):String   
+; - return address of a newly allocated string of bytes 
+;***************************************************************
+String_copy PROC
+    push ebp					     ; preserve base register
+    mov  ebp,esp				     ; set new stack frame
+    sub  esp, 4                      ; make room for len1
+    len1 equ dword ptr[ebp-4]        ; len1 is local variable on stack
+    push ebx					     ; preserve used registers
+    push esi     
+    push edi     
+     
+    mov esi, [ebp + 8]               ; esi = string1
+    push esi     
+    call String_length               ; eax = length of string1
+    mov len1, eax                    ; store length in len1
+    inc len1                         ; + 1 for null terminator
+
+    invoke memoryallocBailey, len1   ; allocate len1 bytes 
+    mov edi, eax                     ; edi = address of new string
+    mov ebx, 0                       ; ebx = string index
+
+copyLoop:
+    mov al, [esi+ebx]                ; al = string[ebx]
+    cmp al, 0                        ; check if at end of string
+    je done                          ; TRUE
+    mov [edi+ebx], al                ; copy byte in al into new stirng
+    inc ebx                          ; string index +1
+    jmp copyLoop                     ; loop
+done:
+    mov byte ptr[edi+ebx], 0         ; add null terminator
+
+    mov eax, edi                     ; eax = address of new string
+    add esp, 4                       ; remove local variable
+    pop edi                          ; restore registers
+    pop esi
+    pop ebx
+    pop ebp
+    ret 4                            ; return & clear stack
+String_copy ENDP
 
 END

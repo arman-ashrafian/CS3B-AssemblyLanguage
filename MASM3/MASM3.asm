@@ -20,11 +20,13 @@
     extern String_length@0:PROC
     extern String_equals@0:PROC
     extern String_equalsIgnoreCase@0:PROC
+    extern String_copy@0:PROC
 
 ; Symplify External Procedure Names
     String_length equ String_length@0
     String_equals equ String_equals@0
     String_equalsIgnoreCase equ String_equalsIgnoreCase@0
+    String_copy equ String_copy@0
 
 ; Data Segment
     .data
@@ -64,6 +66,8 @@
     strIsEqual          byte    "Strings are equal",0
     strNotEqual         byte    "Strings are not equal",0
     strInvalidInput     byte    "Invalid Menu Option!",0
+    strCopied           byte    "String 1 has been copied!",10,
+                                "Address: ",0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)
@@ -164,7 +168,9 @@ loopWithoutMenu:
     je stringEqual
     cmp eax, 5
     je stringEqualIgnoreCase
-    
+    cmp eax, 6
+    je stringCopy
+
     cmp eax, 13
     je quit
     jmp invalidMenuOption
@@ -233,6 +239,17 @@ stringEqualIgnoreCase:
     endOfProc2:
     call NewLine
     jmp loopWithoutMenu
+stringCopy:
+    invoke putstring, addr strCopied
+    push offset strString1
+    call String_copy
+    call WriteHex
+    call NewLine
+    call NewLine
+
+    jmp loopWithoutMenu
+
+
 invalidMenuOption:
     invoke putstring, addr strInvalidInput
     call NewLine
