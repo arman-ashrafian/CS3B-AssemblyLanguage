@@ -31,6 +31,8 @@
 ; Data Segment
     .data
 
+    color     byte      ?
+
     newLine   byte      10,0        ; ascii new line
     strTab    byte      "    ",0    ; 4 spaces
     strSpace  byte      " ",0       ; 1 space
@@ -68,6 +70,7 @@
     strInvalidInput     byte    "Invalid Menu Option!",0
     strCopied           byte    "String 1 has been copied!",10,
                                 "Address: ",0
+    strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)
@@ -150,6 +153,8 @@ NewLine ENDP
 _start:
 
     mov eax, 0                                      ; for OllyDebug
+    call GetTextColor
+    mov color, al                                   ; store console font color
 
 menuLoop:
     mov eax, cyan
@@ -158,7 +163,7 @@ menuLoop:
     call Clrscr                                     ; clear screen
     call PrintMenu
 loopWithoutMenu:
-    mov eax, lightGreen
+    mov eax, lightBlue
     call SetTextColor
 
     call PromptUser
@@ -265,7 +270,10 @@ done:
     jmp menuLoop
 
 quit:
-    mov eax, green
+    invoke putstring, addr strProgramDone
+
+    mov eax, 0
+    mov al, color
     call SetTextColor
 
     invoke ExitProcess, 0
