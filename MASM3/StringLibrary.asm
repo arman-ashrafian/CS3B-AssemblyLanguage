@@ -18,7 +18,7 @@
 
 .code 
 
-String_length PROC
+String_length PROC Near32
     push ebp					; preserve base register
     mov ebp,esp					; set new stack frame
     push ebx					; preserve used registers
@@ -42,7 +42,7 @@ String_length ENDP              ; end String_length function
 ; String_equals(string1:String,string2:String):boolean
 ; - compares string 1 & string 2 byte-by-byte
 ;*******************************************************
-String_equals PROC
+String_equals PROC Near32
     push ebp              ; preserve base pointer
     mov ebp, esp          ; new stack frame
     sub esp, 8            ; make room for two dwords (8 bytes)
@@ -96,7 +96,7 @@ String_equals ENDP
 ; String_equalsIgnoreCase(string1:String,string2:String):boolean
 ; - compares string 1 & string 2 byte-by-byte ignoring case 
 ;***************************************************************
-String_equalsIgnoreCase PROC
+String_equalsIgnoreCase PROC Near32
     push ebp              ; preserve base pointer
     mov ebp, esp          ; new stack frame
     sub esp, 8            ; make room for two dwords (8 bytes)
@@ -157,7 +157,7 @@ String_equalsIgnoreCase ENDP
 ; String_copy(string1:String):String   
 ; - return address of a newly allocated string of bytes 
 ;***************************************************************
-String_copy PROC
+String_copy PROC Near32
     push ebp					     ; preserve base register
     mov  ebp,esp				     ; set new stack frame
     sub  esp, 4                      ; make room for len1
