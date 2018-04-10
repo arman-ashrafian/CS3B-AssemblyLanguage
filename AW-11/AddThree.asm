@@ -6,11 +6,6 @@
 ; Purpose:      Add three numbers
 ;*****************************************************
 
-.386
-.model flat, stdcall
-.stack 4096
-option casemap :none
-
 INCLUDE    ..\..\Irvine\Irvine32.inc
 
 .data
@@ -25,19 +20,21 @@ dVal5 dword 22
 main PROC
     call NewLine
 
-    ; AddThree(dVal1, dVal2, dVal3)
-    push dVal1
+    push dVal1      ; push args
     push dVal2
-    push dVal3
-    call AddThree
-    call WriteDec
-    call NewLine
+    push dVal3      
+    call AddThree   ; AddThree(dVal1, dVal2, dVal3)
+    add esp, 12     ; clean stack
+
+    call WriteDec   ; print result
+    call NewLine    ; print newline
 
     ; AddThree(dVal2, dVal3, dVal4)
     push dVal2
     push dVal3
     push dVal4
     call AddThree
+    add esp, 12     ; clean stack
     call WriteDec
     call NewLine
 
@@ -46,6 +43,7 @@ main PROC
     push dVal4
     push dVal5
     call AddThree
+    add esp, 12     ; clean stack
     call WriteDec
     call NewLine
 
@@ -54,6 +52,7 @@ main PROC
     push dVal3
     push dVal5
     call AddThree
+    add esp, 12     ; clean stack
     call WriteDec
     call NewLine
 
@@ -72,7 +71,7 @@ AddThree PROC
     add eax,[ebp+12]    ; eax += param2
     add eax,[ebp+8]     ; eax += param3
     pop ebp             ; restore base ptr
-    ret 12              ; clean stack
+    ret                 ; return
 AddThree ENDP
 
 ; ****************************************************
