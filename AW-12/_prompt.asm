@@ -17,24 +17,25 @@ arraySize	EQU [ebp+16]
 ptrArray	EQU [ebp+12]
 ptrPrompt	EQU [ebp+8]
 
-	enter	0,0
-	pushad				; save all registers
+	push ebp
+	mov ebp, esp
+	pushad					; save all registers
 
 	mov	ecx,arraySize
-	cmp	ecx,0			; array size <= 0?
-	jle	L2				; yes: quit
+	cmp	ecx,0				; array size <= 0?
+	jle	L2					; yes: quit
 	mov	edx,ptrPrompt		; address of the prompt
 	mov	esi,ptrArray
 
 L1:	call	WriteString		; display string
 	call	ReadInt			; read integer into EAX
-	call	Crlf				; go to next output line
+	call	Crlf			; go to next output line
 	mov	[esi],eax			; store in array
-	add	esi,4			; next integer
+	add	esi,4				; next integer
 	loop	L1
 
-L2:	popad				; restore all registers
-	leave
-	ret 12				; restore the stack
+L2:	popad			; restore all registers
+	pop ebp
+	ret				; restore the stack
 PromptForIntegers ENDP
 END

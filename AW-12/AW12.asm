@@ -36,17 +36,20 @@ main PROC
 	push	OFFSET array
 	push	OFFSET prompt1
 	call	PromptForIntegers
+	add 	esp, 12
 
 ; eax = ArraySum( addr array, Count )
 	push	Count
 	push	OFFSET array
 	call	ArraySum
 	mov	    sum,eax
+	add 	esp, 8
 
 ; DisplaySum( addr prompt2, sum )
 	push	sum
 	push	OFFSET prompt2
 	call	DisplaySum
+	add 	esp, 8
 
 	call	Crlf
 

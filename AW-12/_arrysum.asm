@@ -13,8 +13,10 @@ ArraySum PROC
 ;-----------------------------------------------------
 ptrArray EQU [ebp+8]
 arraySize EQU [ebp+12]
+	
+	push ebp
+	mov ebp, esp
 
-	enter	0,0
 	push	ecx		; don't push EAX
 	push	esi
 
@@ -30,7 +32,7 @@ L1:	add	eax,[esi]		; add each integer to sum
 
 L2:	pop	esi
 	pop	ecx		; return sum in EAX
-	leave
-	ret	8
+	pop ebp
+	ret
 ArraySum ENDP
 END

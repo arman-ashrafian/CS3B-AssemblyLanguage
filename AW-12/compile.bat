@@ -23,7 +23,10 @@ _display.obj ^
 
 :: Delete object files
 del %projectName%.obj
-del StringLibrary.obj
+del _prompt.obj
+del _arrysum.obj
+del _display.obj
+
 
 :: RUN
 %projectName%.exe
