@@ -38,9 +38,13 @@
     strSpace  byte      " ",0       ; 1 space
 
     ; menu
-    strStars          byte   "***********************************",10,0
-    strMASMHead       byte    "**********************************",10,
-                              "              MASM 3              ",10,
+    strStars          byte    "***********************************",
+                              "***********************************",10,0
+
+    strMASMHead       byte    "**********************************",
+                              "**********************************",10,
+                              "                            MASM 3",10,
+                              "**********************************",
                               "**********************************",10,0
     strSetString1       byte    "<1>  Set String 1              ",0
     strSetString2       byte    "<2>  Set String 2              ",0
@@ -61,21 +65,27 @@
     strCurrently        byte    "currently: ",0
     strNull             byte    "NULL",0
     strHoldInt          byte    10 dup(?)
-    strTrue             byte    "True",0
-    strFalse            byte    "False",0
+    strTrue             byte    "TRUE",0
+    strFalse            byte    "FALSE",0
     strLengthOfS1       byte    "Length of string 1: ",0
     strLengthOfS2       byte    "Length of string 2: ",0
     strIsEqual          byte    "Strings are equal",0
     strNotEqual         byte    "Strings are not equal",0
-    strInvalidInput     byte    "Invalid Menu Option!",0
+    strInvalidInput     byte    "Invalid Option!",0
     strCopied           byte    "String 1 has been copied!",10,
                                 "Address: ",0
+    strChooseString     byte    "String 1 or string 2? ",0
     strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)
     strString2          byte   50 dup(?)
     strMenuChoice       byte   10 dup(?)
+
+    ; current values to display on menu
+    strCurrentLength    byte   '0',0,0   ; 3 bytes, initial length 0
+    bCurrentEqual       byte    1 ; initially null strings are equal
+    bCurrentEqualIC     byte    1 ; initially null strings are equal (ignore case)
 
     ; testing data
     strMyName byte "Arman",0
@@ -88,24 +98,45 @@
 PrintMenu PROC
     invoke putstring, addr strMASMHead
     
-    ; <1>
+    ; <1> Set String 1
     invoke putstring, addr strSetString1
     invoke putstring, addr strCurrently
     invoke putstring, addr strString1
     call NewLine
 
-    ; <2>
+    ; <2> Set String 2
     invoke putstring, addr strSetString2
     invoke putstring, addr strCurrently
     invoke putstring, addr strString2
     call NewLine
 
+    ; <3> String Length
     invoke putstring, addr strStringLength
+    invoke putstring, addr strCurrently
+    invoke putstring, addr strCurrentLength
     call NewLine
+
+    ; <4> String Equal
     invoke putstring, addr strStringEquals
+    invoke putstring, addr strCurrently
+    .IF bCurrentEqual == 1
+        invoke putstring, addr strTrue
+    .ELSE
+        invoke putstring, addr strFalse
+    .ENDIF
     call NewLine
+
+    ; <5> String Equal Ignore Case
     invoke putstring, addr strStringEqualsIC
+    invoke putstring, addr strCurrently
+    .IF bCurrentEqualIC == 1
+        invoke putstring, addr strTrue
+    .ELSE
+        invoke putstring, addr strFalse
+    .ENDIF
     call NewLine
+
+
     invoke putstring, addr strStringCopy
     call NewLine
     invoke putstring, addr strStringSub1
@@ -144,6 +175,7 @@ PromptUser ENDP
 ;*************************************************
 NewLine PROC
     invoke putstring, addr newLine
+    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
     ret 
 NewLine ENDP
 
@@ -167,7 +199,6 @@ loopWithoutMenu:
     call SetTextColor
 
     call PromptUser
-    invoke ascint32, addr strMenuChoice             ; convert menu choice to int
 
     cmp eax, 1
     je setString1
@@ -186,70 +217,59 @@ loopWithoutMenu:
     je quit
     jmp invalidMenuOption
 
+; <1> Set String 1
 setString1:
     invoke putstring, addr strPromptString1
     invoke getstring, addr strString1, 50
     jmp done
+
+; <2> Set String 2
 setString2:
     invoke putstring, addr strPromptString2
     invoke getstring, addr strString2, 50
     jmp done
-stringLength:
-    ; print length of string 1
-    push offset strString1                  ; pass string 1 address
-    call String_length                      ; returns length in eax
-    invoke putstring, addr strLengthOfS1    ; print "length of string 1: "
-    invoke intasc32, addr strHoldInt, eax   ; convert eax to string
-    invoke putstring, addr strHoldInt       ; print length
-    call NewLine                            ; print new line
-    ; print length of string 2
-    push offset strString2                  ; pass string 2 address
-    call String_length                      ; returns length in eax
-    invoke putstring, addr strLengthOfS1    ; print "length of string 2: "
-    invoke intasc32, addr strHoldInt, eax   ; convert eax to string
-    invoke putstring, addr strHoldInt       ; print length
 
-    call NewLine                            ; print new line
+; <3> String Length
+stringLength:
+    invoke putstring, addr strChooseString      ; string 1 or string 2
+    invoke getstring, addr strMenuChoice, 10    ; get option
+    invoke ascint32, addr strMenuChoice         ; convert menu choice to int
     call NewLine
-    jmp loopWithoutMenu                     ; loop 
+
+    cmp eax, 1
+    je string1length
+    cmp eax, 2
+    je string2length
+    invoke putstring, addr strInvalidInput
+    call NewLine
+    jmp stringLength
+
+    string1length:
+    push offset strString1
+    jmp getLength
+    string2length:
+    push offset strString2
+    getLength:
+    call String_length
+    invoke intasc32, addr strCurrentLength, eax
+    jmp menuLoop
+
+; <4> String Equal
 stringEqual:
     push offset strString2                  ; pass string 2 address
     push offset strString1                  ; pass string 1 address
     call String_equals                      ; returns boolean in al
-    
-    cmp al, 1
-    je isEqual                              ; TRUE
-    jmp notEqual                            ; FALSE
+    mov  bCurrentEqual, al
+    jmp  menuLoop
 
-    isEqual:
-    invoke putstring, addr strIsEqual
-    call NewLine
-    jmp endOfProc
-    notEqual:
-    invoke putstring, addr strNotEqual
-    call NewLine
-    endOfProc:
-    call NewLine
-    jmp loopWithoutMenu
+; <5> String Equal Ignore Case
 stringEqualIgnoreCase:
     push offset strString2                  ; pass string 2 address
     push offset strString1                  ; pass string 1 address
     call String_equalsIgnoreCase            ; returns boolean in al
+    mov  bCurrentEqualIC, al                ; mov result to bCurrentEqualIC
+    jmp menuLoop
     
-    cmp al, 1
-    je isEqual                              ; TRUE
-    jmp notEqual                            ; FALSE
-
-    isEqual2:
-    invoke putstring, addr strIsEqual
-    call NewLine
-    jmp endOfProc
-    notEqual2:
-    invoke putstring, addr strNotEqual
-    call NewLine
-    endOfProc2:
-    call NewLine
-    jmp loopWithoutMenu
 stringCopy:
     invoke putstring, addr strCopied
     push offset strString1
