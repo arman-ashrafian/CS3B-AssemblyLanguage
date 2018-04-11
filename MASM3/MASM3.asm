@@ -17,10 +17,10 @@
     INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
 
 ; External Procedures
-    extern String_length@0:PROC
-    extern String_equals@0:PROC
-    extern String_equalsIgnoreCase@0:PROC
-    extern String_copy@0:PROC
+    extern String_length@0:Near32
+    extern String_equals@0:Near32
+    extern String_equalsIgnoreCase@0:Near32
+    extern String_copy@0:Near32
 
 ; Symplify External Procedure Names
     String_length equ String_length@0
@@ -38,10 +38,10 @@
     strSpace  byte      " ",0       ; 1 space
 
     ; menu
-    strStars          byte   "***************************************************",10,0
-    strMASMHead       byte    "**************************************************",10,
-                              "                      MASM 3                      ",10,
-                              "**************************************************",10,0
+    strStars          byte   "***********************************",10,0
+    strMASMHead       byte    "**********************************",10,
+                              "              MASM 3              ",10,
+                              "**********************************",10,0
     strSetString1       byte    "<1>  Set String 1              ",0
     strSetString2       byte    "<2>  Set String 2              ",0
     strStringLength     byte    "<3>  String_length             ",0
@@ -70,7 +70,7 @@
     strInvalidInput     byte    "Invalid Menu Option!",0
     strCopied           byte    "String 1 has been copied!",10,
                                 "Address: ",0
-    strProgramDone      byte    10,"Program Finished.",10,10,0
+    strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
     strString1          byte   50 dup(?)

@@ -6,12 +6,6 @@
 ; Purpose:      String Library
 ;**************************************************************************
 
-; Dot Directives
-.486
-    .model flat, STDCALL
-    .stack 4096
-    option casemap :none
-
 ; Include Libraries
     INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
     INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
