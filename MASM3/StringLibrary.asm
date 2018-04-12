@@ -32,10 +32,10 @@ finished:
     ret 4                       ; returns result from eax & clears local stack frame
 String_length ENDP              ; end String_length function
 
-;*******************************************************
+;***********************************************************************
 ; String_equals(string1:String,string2:String):boolean
 ; - compares string 1 & string 2 byte-by-byte
-;*******************************************************
+;***********************************************************************
 String_equals PROC Near32
     push ebp              ; preserve base pointer
     mov ebp, esp          ; new stack frame
@@ -45,8 +45,8 @@ String_equals PROC Near32
     push ebx              ; preserve base pointer
     push edi              ; preserve edi
     push esi              ; preserve esi
-    mov ebx, [ebp + 8]    ; ebx = first string
-    mov esi, [ebp + 12]   ; esi = second string
+    mov ebx, [ebp + 12]   ; ebx = first string
+    mov esi, [ebp + 8]    ; esi = second string
 
     ; determine length of strings
     push ebx            ; string 1 address
@@ -86,10 +86,10 @@ return:
     ret 8           ; return & clear local stack
 String_equals ENDP
 
-;***************************************************************
+;***********************************************************************
 ; String_equalsIgnoreCase(string1:String,string2:String):boolean
 ; - compares string 1 & string 2 byte-by-byte ignoring case 
-;***************************************************************
+;***********************************************************************
 String_equalsIgnoreCase PROC Near32
     push ebp              ; preserve base pointer
     mov ebp, esp          ; new stack frame
@@ -100,8 +100,8 @@ String_equalsIgnoreCase PROC Near32
     push edi              ; preserve edi
     push esi              ; preserve esi
     push ecx              ; preserve ecx
-    mov ebx, [ebp + 8]    ; ebx = first string
-    mov esi, [ebp + 12]   ; esi = second string
+    mov ebx, [ebp + 12]   ; ebx = first string
+    mov esi, [ebp + 8]    ; esi = second string
 
     ; determine length of strings
     push ebx            ; string 1 address
@@ -147,10 +147,10 @@ return:
     ret 8           ; return & clear local stack
 String_equalsIgnoreCase ENDP
 
-;***************************************************************
+;***********************************************************************
 ; String_copy(string1:String):String   
 ; - return address of a newly allocated string of bytes 
-;***************************************************************
+;***********************************************************************
 String_copy PROC Near32
     push ebp					     ; preserve base register
     mov  ebp,esp				     ; set new stack frame
@@ -188,5 +188,81 @@ done:
     pop ebp
     ret 4                            ; return & clear stack
 String_copy ENDP
+
+;***********************************************************************
+; String_substring_1(string1:String,beginIndex:int,endIndex:int):String   
+; - return address of a newly allocated string of bytes 
+;***********************************************************************
+; check if string is empty    X
+; check if start > end        X
+; check if end > length       X
+String_substring_1 PROC Near32
+    ;int 3
+
+    push ebp
+    mov ebp, esp    ; new stack frame
+
+    ; local variables
+    sub esp, 4              ; allocate 4 bytes
+    strLen equ [ebp - 4]    ; store string length
+
+    ; preserve registers
+    push ebx    ; EBX - string address
+    push ecx    ; ECX - beginning index
+    push edx    ; EDX - ending index
+    push esi    ; ESI - length of substring
+    push edi    ; EDI - addr ptr of for substring 
+
+    ; arguments
+    string equ [ebp + 16]   ; string1   
+    mov ebx, string         ; EBX = string address
+    begin  equ [ebp + 12]   ; beginning index
+    mov ecx, begin          ; ECX = beginning index
+    endIn  equ [ebp + 8]    ; ending index
+    mov edx, endIn          ; EDX = ending index
+    
+    ; check if end > begin
+    .IF ecx > edx
+        jmp backToDriver
+    .ENDIF
+
+    ; get length of string
+    push string
+    call String_length
+    mov  strLen, eax
+
+    cmp eax, 0           ; check if string is empty
+    je backToDriver
+    .IF endIn > eax      ; check if end > length
+        jmp backToDriver
+    .ENDIF
+
+    mov esi, endIn
+    sub esi, begin                  ; ESI now stores length of substring
+    inc esi                         ; add room for null terminator
+    invoke memoryallocBailey, esi   ; allocate room for substring (EAX)
+    mov edi, eax                    ; edi = ptr to new string
+    mov esi, begin                  ; esi = string index
+
+copyLoop:
+    mov al, [ebx+esi]                ; al = string[ebx]
+    cmp esi, endIn                   ; check string index = end index
+    je loopdone                      ; TRUE
+    mov [edi+esi], al                ; copy byte in al into new stirng
+    inc esi                          ; string index +1
+    jmp copyLoop                     ; loop    
+loopdone:
+    mov byte ptr[edi+esi], 0         ; add null terminator
+backToDriver:
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    pop ebp
+    add esp, 4
+    ret 4                            ; clean stack
+
+String_substring_1 ENDP
 
 END
