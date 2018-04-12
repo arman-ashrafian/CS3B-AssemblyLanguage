@@ -260,8 +260,8 @@ backToDriver:
     pop edx
     pop ecx
     pop ebx
-    pop ebp
     add esp, 4
+    pop ebp
     ret 4                            ; clean stack
 
 String_substring_1 ENDP
@@ -326,8 +326,8 @@ backToDriver:
     pop esi
     pop ecx
     pop ebx
-    pop ebp
     add esp, 4
+    pop ebp
     ret 4                            ; clean stack
 
 String_substring_2 ENDP
@@ -371,4 +371,75 @@ String_charAt ENDP
 ; String_startsWith_1(string1:String,strPrefix:String, pos:int):boolean
 ; - return true if string1 contains strPrefix starting at offset pos
 ;***********************************************************************
+String_startsWith_1 PROC Near32
+    push ebp
+    mov ebp, esp
+
+    ; arguments
+    string      equ [ebp+16]
+    strPrefix   equ [ebp+12]
+    pos         equ [ebp+8]
+
+    ; local variables
+    sub esp, 8
+    strLen      equ [ebp-4]
+    strPreLen   equ [ebp-8]
+
+    ; preserve registers
+    push ebx
+    push ecx
+    push edx
+    push esi
+    push edi
+
+    push strPrefix
+    call String_length
+    mov strPrelen, eax      ; strPreLen = prefix string length
+    push string
+    call String_length
+
+    ; check if string is empty OR
+    ; pos > string length OR
+    ; string length < prefix length
+    .IF (eax == 0) || (eax < pos) || (eax < strPreLen)
+        jmp backToDriver
+    .ENDIF
+    mov eax, strPreLen
+    ; check if prefix is empty
+    .IF eax == 0
+        jmp backToDriver
+    .ENDIF
+
+    mov ebx, pos        ; EBX = pos
+    mov ecx, 0          ; ECX = 0 (used to loop thru prefix)
+    mov edx, string     ; EDX = string addr
+    mov esi, strPrefix  ; ESI = prefix addr
+
+    mov eax, 0          ; zero out for IF statement
+    mov edi, 0
+compLoop:
+    mov al, [edx+ebx]     ; AL = string[ebx]
+    mov di, [esi+ecx]     ; DI = prefix[ecx]
+    .IF eax != edi        ; IF chars are not equal
+        mov al, 0         ; set al to False
+        jmp backToDriver  ; return
+    .ELSEIF di == 0       ; IF reached end of prefix
+        mov al, 1         ; set al to True
+        jmp backToDriver  ; return
+    .ENDIF
+    inc ebx
+    inc ecx
+    jmp compLoop
+
+backToDriver:
+    pop edi
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    add esp, 8  ; clean local variables
+    pop ebp     ; restore base ptr
+
+String_startsWith_1 ENDP
+
 END
