@@ -24,6 +24,7 @@
     extern String_substring_1@0:Near32
     extern String_substring_2@0:Near32
     extern String_charAt@0:Near32
+    extern String_startsWith_1@0:Near32
 
 ; Symplify External Procedure Names
     String_length           equ String_length@0
@@ -33,6 +34,7 @@
     String_substring_1      equ String_substring_1@0
     String_substring_2      equ String_substring_2@0
     String_charAt           equ String_charAt@0
+    String_startsWith_1     equ String_startsWith_1@0
 
 ; Data Segment
     .data
@@ -84,6 +86,7 @@
     strIndexBeginPrompt byte    "Begin: ",0
     strIndexEndPrompt   byte    "End: ",0
     strIndex            byte    "Index: ",0
+    strOffset           byte    "Offset: ",0
     strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
@@ -99,7 +102,9 @@
     dCopiedHex          dword   ?               ; copied string address (hex)
     dSub1Hex            dword   ?               ; substring 1 address (hex)
     dSub2Hex            dword   ?               ; substring 2 address (hex)
-    bCharAt             byte    ?
+    bCharAt             byte    ?               ; current CharAt value
+    bStartsWith1        byte    ?               ; boolean value for startsWith1 procedure
+
     ; testing data
     strMyName byte "Arman",0
 
@@ -197,6 +202,12 @@ PrintMenu PROC
 
     ; <10> String starts 1
     invoke putstring, addr strStringStarts1
+    invoke putstring, addr strCurrently
+    .IF bStartsWith1 == 0
+        invoke putstring, addr strFalse
+    .ELSE
+        invoke putstring, addr strTrue
+    .ENDIF
     call NewLine
 
     ; <11> String starts 2
@@ -276,6 +287,8 @@ loopWithoutMenu:
     je stringSub2
     cmp eax, 9
     je charAt
+    cmp eax, 10
+    je startsWith1
 
     cmp eax, 13
     je quit
@@ -421,6 +434,19 @@ charAt:
     push eax
     call String_charAt
     mov  bCharAt, al
+    jmp menuLoop
+
+; <10> Starts With 1
+startsWith1:
+    invoke putstring, addr strOffset
+    invoke getstring, addr strHoldInt, 10
+    invoke ascint32, addr strHoldInt
+
+    push offset strString1
+    push offset strString2
+    push eax
+    call String_startsWith_1
+    mov bStartsWith1, al
     jmp menuLoop
 
 invalidMenuOption:

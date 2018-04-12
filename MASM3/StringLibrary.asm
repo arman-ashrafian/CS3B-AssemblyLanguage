@@ -262,7 +262,7 @@ backToDriver:
     pop ebx
     add esp, 4
     pop ebp
-    ret 4                            ; clean stack
+    ret 12                            ; clean stack
 
 String_substring_1 ENDP
 
@@ -328,7 +328,7 @@ backToDriver:
     pop ebx
     add esp, 4
     pop ebp
-    ret 4                            ; clean stack
+    ret 8                            ; clean stack
 
 String_substring_2 ENDP
 
@@ -390,14 +390,13 @@ String_startsWith_1 PROC Near32
     push ecx
     push edx
     push esi
-    push edi
 
     push strPrefix
     call String_length
     mov strPrelen, eax      ; strPreLen = prefix string length
     push string
     call String_length
-
+    mov strLen, eax
     ; check if string is empty OR
     ; pos > string length OR
     ; string length < prefix length
@@ -414,17 +413,14 @@ String_startsWith_1 PROC Near32
     mov ecx, 0          ; ECX = 0 (used to loop thru prefix)
     mov edx, string     ; EDX = string addr
     mov esi, strPrefix  ; ESI = prefix addr
-
-    mov eax, 0          ; zero out for IF statement
-    mov edi, 0
 compLoop:
     mov al, [edx+ebx]     ; AL = string[ebx]
-    mov di, [esi+ecx]     ; DI = prefix[ecx]
-    .IF eax != edi        ; IF chars are not equal
-        mov al, 0         ; set al to False
+    mov ah, [esi+ecx]     ; DI = prefix[ecx]
+    .IF ah == 0           ; IF chars are not equal
+        mov al, 1         ; set al to False
         jmp backToDriver  ; return
-    .ELSEIF di == 0       ; IF reached end of prefix
-        mov al, 1         ; set al to True
+    .ELSEIF al != ah      ; IF reached end of prefix
+        mov al, 0         ; set al to True
         jmp backToDriver  ; return
     .ENDIF
     inc ebx
@@ -432,14 +428,13 @@ compLoop:
     jmp compLoop
 
 backToDriver:
-    pop edi
     pop esi
     pop edx
     pop ecx
     pop ebx
     add esp, 8  ; clean local variables
     pop ebp     ; restore base ptr
-
+    ret 12
 String_startsWith_1 ENDP
 
 END
