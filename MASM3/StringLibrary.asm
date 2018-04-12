@@ -193,12 +193,8 @@ String_copy ENDP
 ; String_substring_1(string1:String,beginIndex:int,endIndex:int):String   
 ; - return address of a newly allocated string of bytes 
 ;***********************************************************************
-; check if string is empty    X
-; check if start > end        X
-; check if end > length       X
 String_substring_1 PROC Near32
     ;int 3
-
     push ebp
     mov ebp, esp    ; new stack frame
 
@@ -223,6 +219,7 @@ String_substring_1 PROC Near32
     
     ; check if end > begin
     .IF ecx > edx
+        mov eax, 0
         jmp backToDriver
     .ENDIF
 
@@ -234,6 +231,7 @@ String_substring_1 PROC Near32
     cmp eax, 0           ; check if string is empty
     je backToDriver
     .IF endIn > eax      ; check if end > length
+        mov eax, 0
         jmp backToDriver
     .ENDIF
 
@@ -242,17 +240,20 @@ String_substring_1 PROC Near32
     inc esi                         ; add room for null terminator
     invoke memoryallocBailey, esi   ; allocate room for substring (EAX)
     mov edi, eax                    ; edi = ptr to new string
-    mov esi, begin                  ; esi = string index
+    mov esi, 0                      ; esi = string index
 
 copyLoop:
+    add esi, begin                   ; add begin index to OG string pointer
     mov al, [ebx+esi]                ; al = string[ebx]
     cmp esi, endIn                   ; check string index = end index
     je loopdone                      ; TRUE
+    sub esi, begin                   ; sub begin index from substring pointer
     mov [edi+esi], al                ; copy byte in al into new stirng
     inc esi                          ; string index +1
     jmp copyLoop                     ; loop    
 loopdone:
     mov byte ptr[edi+esi], 0         ; add null terminator
+    mov eax, edi                     ; eax = substring address
 backToDriver:
     pop edi
     pop esi
@@ -265,4 +266,109 @@ backToDriver:
 
 String_substring_1 ENDP
 
+;***********************************************************************
+; String_substring_2(string1:String,beginIndex:int):String  
+; - return address of a newly allocated string of bytes 
+;***********************************************************************
+String_substring_2 PROC Near32
+    push ebp
+    mov ebp, esp    ; new stack frame
+
+    ; local variables
+    sub esp, 4              ; allocate 4 bytes
+    strLen equ [ebp - 4]    ; store string length
+
+    ; preserve registers
+    push ebx    ; EBX - string address
+    push ecx    ; ECX - beginning index
+    push esi    ; ESI - length of substring
+    push edi    ; EDI - addr ptr of for substring 
+
+    ; arguments
+    string equ [ebp + 12]   ; string1   
+    mov ebx, string         ; EBX = string address
+    begin  equ [ebp + 8]    ; beginning index
+    mov ecx, begin          ; ECX = beginning index
+
+    ; get length of string
+    push string
+    call String_length
+    mov  strLen, eax
+
+    cmp eax, 0           ; check if string is empty
+    je backToDriver
+    .IF begin > eax      ; check if begin > length
+        mov eax, 0
+        jmp backToDriver
+    .ENDIF
+
+    mov esi, strLen
+    sub esi, begin                  ; ESI now stores length of substring
+    inc esi                         ; add room for null terminator
+    invoke memoryallocBailey, esi   ; allocate room for substring (EAX)
+    mov edi, eax                    ; edi = ptr to new string
+    mov esi, 0                      ; esi = string index
+
+copyLoop:
+    add esi, begin                   ; add begin index to OG string pointer
+    mov al, [ebx+esi]                ; al = string[ebx]
+    cmp esi, strLen                  ; check string index = end index
+    je loopdone                      ; TRUE
+    sub esi, begin                   ; sub begin index from substring pointer
+    mov [edi+esi], al                ; copy byte in al into new stirng
+    inc esi                          ; string index +1
+    jmp copyLoop                     ; loop    
+loopdone:
+    mov byte ptr[edi+esi], 0         ; add null terminator
+    mov eax, edi                     ; eax = substring address
+backToDriver:
+    pop edi
+    pop esi
+    pop ecx
+    pop ebx
+    pop ebp
+    add esp, 4
+    ret 4                            ; clean stack
+
+String_substring_2 ENDP
+
+;***********************************************************************
+; String_charAt(string1:String,position:int):char (byte)
+; - returns char in AL
+;***********************************************************************
+String_charAt PROC Near32
+    push ebp
+    mov ebp, esp
+
+    ; arguments
+    string  equ [ebp+12]
+    pos     equ [ebp+8]
+
+    ; preserver register
+    push ebx
+
+    push string
+    call String_length
+
+    cmp eax, 0
+    jmp backToDriver
+    .IF pos > eax
+        mov eax, 0
+        jmp backToDriver
+    .ENDIF
+
+    mov eax, 0
+    mov ebx, string
+    mov al, [ebx+pos]
+
+backToDriver:
+    pop ebx
+    pop ebp
+    ret 8
+String_charAt ENDP
+
+;***********************************************************************
+; String_startsWith_1(string1:String,strPrefix:String, pos:int):boolean
+; - return true if string1 contains strPrefix starting at offset pos
+;***********************************************************************
 END

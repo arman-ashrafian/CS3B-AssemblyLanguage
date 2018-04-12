@@ -22,6 +22,8 @@
     extern String_equalsIgnoreCase@0:Near32
     extern String_copy@0:Near32
     extern String_substring_1@0:Near32
+    extern String_substring_2@0:Near32
+    extern String_charAt@0:Near32
 
 ; Symplify External Procedure Names
     String_length           equ String_length@0
@@ -29,6 +31,8 @@
     String_equalsIgnoreCase equ String_equalsIgnoreCase@0
     String_copy             equ String_copy@0
     String_substring_1      equ String_substring_1@0
+    String_substring_2      equ String_substring_2@0
+    String_charAt           equ String_charAt@0
 
 ; Data Segment
     .data
@@ -56,7 +60,7 @@
     strStringCopy       byte    "<6>  String_copy               ",0
     strStringSub1       byte    "<7>  String_substring_1        ",0
     strStringSub2       byte    "<8>  String_substring_2        ",0
-    strStringCharAt     byte    "<9>  String_chartAt            ",0
+    strStringCharAt     byte    "<9>  String_charAt             ",0
     strStringStarts1    byte    "<10> String_startsWith_1       ",0
     strStringStarts2    byte    "<11> String_startsWith_2       ",0
     strStringEndWith    byte    "<12> String_endWith            ",0
@@ -79,6 +83,7 @@
     strChooseString     byte    "String 1 or string 2? ",0
     strIndexBeginPrompt byte    "Begin: ",0
     strIndexEndPrompt   byte    "End: ",0
+    strIndex            byte    "Index: ",0
     strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
@@ -90,10 +95,11 @@
     strCurrentLength    byte   '0',0,0          ; 3 bytes, initial length 0
     bCurrentEqual       byte    1               ; initially null strings are equal
     bCurrentEqualIC     byte    1               ; initially null strings are equal (ignore case)
-    strNewAddress       byte    9  dup(?)       ; copied string address (string)
     strCopiedString     byte    50 dup(?)       ; copied string
     dCopiedHex          dword   ?               ; copied string address (hex)
-
+    dSub1Hex            dword   ?               ; substring 1 address (hex)
+    dSub2Hex            dword   ?               ; substring 2 address (hex)
+    bCharAt             byte    ?
     ; testing data
     strMyName byte "Arman",0
 
@@ -158,14 +164,35 @@ PrintMenu PROC
 
     ; <7> Substring 1
     invoke putstring, addr strStringSub1
+    invoke putch, '&'
+    mov eax, dSub1Hex
+    call WriteHex
+    invoke putch, ' '
+    invoke putch, ' '
+    invoke putstring, addr strCurrently
+    .IF eax != 0
+        invoke putstring, eax
+    .ENDIF
     call NewLine
 
     ; <8> Substring 2
     invoke putstring, addr strStringSub2
+    invoke putch, '&'
+    mov eax, dSub2Hex
+    call WriteHex
+    invoke putch, ' '
+    invoke putch, ' '
+    invoke putstring, addr strCurrently
+    .IF eax != 0
+        invoke putstring, eax
+    .ENDIF
     call NewLine
 
     ; <9> Char at
     invoke putstring, addr strStringCharAt
+    invoke putstring, addr strCurrently
+    invoke putch, ' '
+    invoke putch, bCharAt
     call NewLine
 
     ; <10> String starts 1
@@ -197,6 +224,7 @@ PromptUser PROC
     invoke putstring, addr strMenuChoicePrompt
     invoke getstring, addr strMenuChoice, 10
     call NewLine
+    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
     ret
 PromptUser ENDP
 
@@ -206,7 +234,6 @@ PromptUser ENDP
 ;*************************************************
 NewLine PROC
     invoke putstring, addr newLine
-    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
     ret 
 NewLine ENDP
 
@@ -245,6 +272,10 @@ loopWithoutMenu:
     je stringCopy
     cmp eax, 7
     je stringSub1
+    cmp eax, 8
+    je stringSub2
+    cmp eax, 9
+    je charAt
 
     cmp eax, 13
     je quit
@@ -254,13 +285,13 @@ loopWithoutMenu:
 setString1:
     invoke putstring, addr strPromptString1
     invoke getstring, addr strString1, 50
-    jmp done
+    jmp menuLoop
 
 ; <2> Set String 2
 setString2:
     invoke putstring, addr strPromptString2
     invoke getstring, addr strString2, 50
-    jmp done
+    jmp menuLoop
 
 ; <3> String Length
 stringLength:
@@ -336,6 +367,60 @@ stringSub1:
     push ebx
     push eax
     call String_substring_1
+    .IF eax == 0                                ; check EAX == 0 (error)
+        call NewLine
+        call NewLine
+        invoke putstring, addr strInvalidInput
+        call NewLine
+        call NewLine
+        jmp loopWithoutMenu
+    .ENDIF
+    mov dSub1Hex, eax                          ; if no error save addr of substring
+    jmp menuLoop
+
+; <8> Substring 2
+stringSub2:
+    invoke putstring, addr strChooseString      ; string 1 or string 2
+    invoke getstring, addr strMenuChoice, 10    ; get option
+    invoke ascint32, addr strMenuChoice         ; convert menu choice to int
+    call NewLine
+
+    .IF eax == 1
+        push offset strString1
+    .ELSEIF eax == 2
+        push offset strString2
+    .ELSE
+        invoke putstring, addr strInvalidInput
+        call NewLine
+        jmp stringSub2
+    .ENDIF
+
+    invoke putstring, addr strIndexBeginPrompt
+    invoke getstring, addr strHoldInt, 10
+    invoke ascint32, addr strHoldInt
+
+    push eax
+    call String_substring_2
+    .IF eax == 0                                ; check EAX == 0 (error)
+        call NewLine
+        call NewLine
+        invoke putstring, addr strInvalidInput
+        call NewLine
+        call NewLine
+        jmp loopWithoutMenu
+    .ENDIF
+    mov dSub2Hex, eax                          ; if no error save addr of substring
+    jmp menuLoop
+
+; <9> CharAt
+charAt:
+    invoke putstring, addr strIndex
+    invoke getstring, addr strHoldInt, 10
+    invoke ascint32, addr strHoldInt
+
+    push eax
+    call String_charAt
+    mov  bCharAt, al
     jmp menuLoop
 
 invalidMenuOption:
@@ -343,8 +428,6 @@ invalidMenuOption:
     call NewLine
     call NewLine
     jmp loopWithoutMenu
-done:
-    jmp menuLoop
 
 quit:
     invoke putstring, addr strProgramDone
