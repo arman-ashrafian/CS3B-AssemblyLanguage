@@ -92,20 +92,21 @@
     strProgramDone      byte    "Program Finished.",10,10,0
 
     ; user input (bufffer size - 50 bytes)
-    strString1          byte   50 dup(?)
-    strString2          byte   50 dup(?)
+    strString1          byte   "NULL", 46 dup(?)
+    strString2          byte   "NULL", 46 dup(?)
     strMenuChoice       byte   10 dup(?)
 
     ; current values to display on menu
-    strCurrentLength    byte   '0',0,0          ; 3 bytes, initial length 0
-    bCurrentEqual       byte    1               ; initially null strings are equal
-    bCurrentEqualIC     byte    1               ; initially null strings are equal (ignore case)
-    strCopiedString     byte    50 dup(?)       ; copied string
-    dCopiedHex          dword   ?               ; copied string address (hex)
-    dSub1Hex            dword   ?               ; substring 1 address (hex)
-    dSub2Hex            dword   ?               ; substring 2 address (hex)
-    bCharAt             byte    ?               ; current CharAt value
-    bStartsWith1        byte    ?               ; boolean value for startsWith1 procedure
+    strCurrentLength    byte   '0',0,0     ; 3 bytes, initial length 0
+    bCurrentEqual       byte    0          ; initially null strings are not equal
+    bCurrentEqualIC     byte    0          ; initially null strings are not equal (ignore case)
+    strCopiedString     byte    50 dup(?)  ; copied string
+    dCopiedHex          dword   ?          ; copied string address (hex)
+    dSub1Hex            dword   ?          ; substring 1 address (hex)
+    dSub2Hex            dword   ?          ; substring 2 address (hex)
+    bCharAt             byte    ?          ; current CharAt value
+    bStartsWith1        byte    ?          ; bool value for startsWith1 procedure
+    bStartsWith2        byte    ?          ; bool value for startsWith2 procedure
 
     ; testing data
     strMyName byte "Arman",0
@@ -198,7 +199,11 @@ PrintMenu PROC
     ; <9> Char at
     invoke putstring, addr strStringCharAt
     invoke putstring, addr strCurrently
-    invoke putch, bCharAt
+    .IF bCharAt == 0
+        invoke putstring, addr strNull
+    .ELSE 
+        invoke putch, bCharAt
+    .ENDIF
     call NewLine
 
     ; <10> String starts 1
@@ -213,6 +218,12 @@ PrintMenu PROC
 
     ; <11> String starts 2
     invoke putstring, addr strStringStarts2
+    invoke putstring, addr strCurrently
+    .IF bStartsWith2 == 0
+        invoke putstring, addr strFalse
+    .ELSE
+        invoke putstring, addr strTrue
+    .ENDIF
     call NewLine
 
     ; <12> String ends with
@@ -290,6 +301,8 @@ loopWithoutMenu:
     je charAt
     cmp eax, 10
     je startsWith1
+    cmp eax, 11
+    je startsWith2
 
     cmp eax, 13
     je quit
@@ -449,6 +462,14 @@ startsWith1:
     push eax
     call String_startsWith_1
     mov bStartsWith1, al
+    jmp menuLoop
+
+; <11> Starts With 2
+startsWith2:
+    push offset strString1
+    push offset strString2
+    call String_startsWith_2
+    mov bStartsWith2, al
     jmp menuLoop
 
 invalidMenuOption:

@@ -425,7 +425,7 @@ compLoop:
     .IF ah == 0           ; IF reached end of prefix
         mov al, 1         ; set al to True
         jmp backToDriver  ; return
-    .ELSEIF al != ah      ; IF chars are not equalIF reached end of prefix
+    .ELSEIF al != ah      ; IF chars are not equal
         mov al, 0         ; set al to False
         jmp backToDriver  ; return
     .ENDIF
@@ -477,11 +477,13 @@ String_startsWith_2 PROC Near32
     ; check if string is empty OR
     ; string length < prefix length
     .IF (eax == 0) || (eax < strPreLen)
+        mov al, 0 ; return False
         jmp backToDriver
     .ENDIF
     mov eax, strPreLen
     ; check if prefix is empty
     .IF eax == 0
+        mov al, 0 ; return False
         jmp backToDriver
     .ENDIF
 
