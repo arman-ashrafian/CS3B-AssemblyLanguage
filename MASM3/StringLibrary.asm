@@ -346,22 +346,25 @@ String_charAt PROC Near32
 
     ; preserver register
     push ebx
+    push ecx
 
     push string
     call String_length
 
     cmp eax, 0
-    jmp backToDriver
-    .IF pos > eax
+    je backToDriver ; return if string length == 0
+    .IF pos >= eax   ; return if char index > string length
         mov eax, 0
         jmp backToDriver
     .ENDIF
 
     mov eax, 0
     mov ebx, string
-    mov al, [ebx+pos]
+    mov ecx, pos
+    mov al, [ebx+ecx]   ; mov char into AL
 
 backToDriver:
+    pop ecx
     pop ebx
     pop ebp
     ret 8
@@ -397,15 +400,18 @@ String_startsWith_1 PROC Near32
     push string
     call String_length
     mov strLen, eax
+
     ; check if string is empty OR
     ; pos > string length OR
     ; string length < prefix length
-    .IF (eax == 0) || (eax < pos) || (eax < strPreLen)
+    .IF (eax == 0) || (eax <= pos) || (eax < strPreLen)
+        mov al, 0 ; return False
         jmp backToDriver
     .ENDIF
     mov eax, strPreLen
     ; check if prefix is empty
     .IF eax == 0
+        mov al, 0 ; return False
         jmp backToDriver
     .ENDIF
 
@@ -416,11 +422,11 @@ String_startsWith_1 PROC Near32
 compLoop:
     mov al, [edx+ebx]     ; AL = string[ebx]
     mov ah, [esi+ecx]     ; DI = prefix[ecx]
-    .IF ah == 0           ; IF chars are not equal
-        mov al, 1         ; set al to False
+    .IF ah == 0           ; IF reached end of prefix
+        mov al, 1         ; set al to True
         jmp backToDriver  ; return
-    .ELSEIF al != ah      ; IF reached end of prefix
-        mov al, 0         ; set al to True
+    .ELSEIF al != ah      ; IF chars are not equalIF reached end of prefix
+        mov al, 0         ; set al to False
         jmp backToDriver  ; return
     .ENDIF
     inc ebx
@@ -436,5 +442,74 @@ backToDriver:
     pop ebp     ; restore base ptr
     ret 12
 String_startsWith_1 ENDP
+
+;***********************************************************************
+; String_startsWith_2(string1:String,strPrefix:String):boolean
+; - return true if string1 starts with strPrefix
+;***********************************************************************
+String_startsWith_2 PROC Near32
+    ; new stack frame
+    push ebp
+    mov ebp, esp
+
+    ; arguments
+    string      equ [ebp+12]
+    strPrefix   equ [ebp+8]
+
+    ; local variables
+    sub esp, 8
+    strLen      equ [ebp-4]
+    strPreLen   equ [ebp-8]
+
+    ; preserve registers
+    push ebx
+    push ecx
+    push edx
+
+    ; get length of string & strPrefix
+    push strPrefix
+    call String_length
+    mov strPrelen, eax      ; strPreLen = prefix string length
+    push string
+    call String_length
+    mov strLen, eax
+
+    ; check if string is empty OR
+    ; string length < prefix length
+    .IF (eax == 0) || (eax < strPreLen)
+        jmp backToDriver
+    .ENDIF
+    mov eax, strPreLen
+    ; check if prefix is empty
+    .IF eax == 0
+        jmp backToDriver
+    .ENDIF
+
+    mov ebx, 0          ; EBX = loop counter
+    mov ecx, strPrefix  ; ECX = prefix addr
+    mov edx, string     ; EDX = string addr
+
+compLoop:
+    mov al, [edx+ebx]     ; AL = string[ebx]
+    mov ah, [ecx+ebx]     ; DI = prefix[ecx]
+    .IF ah == 0           ; IF reached end of prefix
+        mov al, 1         ; set al to True
+        jmp backToDriver  ; return
+    .ELSEIF al != ah      ; IF chars are not equal
+        mov al, 0         ; set al to False
+        jmp backToDriver  ; return
+    .ENDIF
+    inc ebx
+    jmp compLoop
+
+backToDriver:
+    pop edx
+    pop ecx
+    pop ebx
+    add esp, 8  ; clean local variables
+    pop ebp     ; restore base ptr
+    ret 8
+
+String_startsWith_2 ENDP
 
 END

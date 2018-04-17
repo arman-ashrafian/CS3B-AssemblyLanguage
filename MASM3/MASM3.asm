@@ -25,6 +25,7 @@
     extern String_substring_2@0:Near32
     extern String_charAt@0:Near32
     extern String_startsWith_1@0:Near32
+    extern String_startsWith_2@0:Near32
 
 ; Symplify External Procedure Names
     String_length           equ String_length@0
@@ -35,6 +36,7 @@
     String_substring_2      equ String_substring_2@0
     String_charAt           equ String_charAt@0
     String_startsWith_1     equ String_startsWith_1@0
+    String_startsWith_2     equ String_startsWith_2@0
 
 ; Data Segment
     .data
@@ -196,7 +198,6 @@ PrintMenu PROC
     ; <9> Char at
     invoke putstring, addr strStringCharAt
     invoke putstring, addr strCurrently
-    invoke putch, ' '
     invoke putch, bCharAt
     call NewLine
 
@@ -431,6 +432,7 @@ charAt:
     invoke getstring, addr strHoldInt, 10
     invoke ascint32, addr strHoldInt
 
+    push offset strString1
     push eax
     call String_charAt
     mov  bCharAt, al
