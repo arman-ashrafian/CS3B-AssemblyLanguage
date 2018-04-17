@@ -514,4 +514,78 @@ backToDriver:
 
 String_startsWith_2 ENDP
 
+;***********************************************************************
+;+String_endsWith(string1:String, suffix:String):boolean
+; - check if string ends with suffix
+;***********************************************************************
+String_endsWith PROC Near32
+    push ebp
+    mov ebp, esp
+
+    ; arguments
+    string equ [ebp+12]
+    suffix equ [ebp+8]
+
+    ; local variables
+    sub esp, 8
+    strLen     equ [ebp-4]
+    strSufLen  equ [ebp-8]
+
+    ; preserve registers
+    push ebx
+    push ecx
+    push edx
+    push esi
+
+    ; get length of string & suffix
+    push suffix
+    call String_length
+    mov strSufLen, eax
+
+    push string
+    call String_length
+    mov strLen, eax
+
+    ; check if string is empty OR
+    ; string length < suffix length
+    .IF (eax == 0) || (eax < strSufLen)
+        mov al, 0 ; return False
+        jmp backToDriver
+    .ENDIF
+    mov eax, strSufLen
+    ; check if suffix is empty
+    .IF eax == 0
+        mov al, 0 ; return False
+        jmp backToDriver
+    .ENDIF
+
+    mov ebx, strLen
+    sub ebx, strSufLen  ; EBX = strLen - strSufLen
+    mov ecx, 0          ; ECX = 0
+    mov esi, string     ; ESI = *string
+    mov edx, suffix     ; EDX = *suffix
+compLoop:
+    mov al, [esi+ebx]   ; AL = string[ebx]
+    mov ah, [edx+ecx]   ; AH = string[ecx]
+    .IF ah == 0           ; IF reached end of suffix
+        mov al, 1         ; set al to True
+        jmp backToDriver  ; return
+    .ELSEIF al != ah      ; IF chars are not equal
+        mov al, 0         ; set al to False
+        jmp backToDriver  ; return
+    .ENDIF
+    inc ebx
+    inc ecx
+    jmp compLoop
+
+backToDriver:
+    pop esi     ; restore registers
+    pop edx
+    pop ecx
+    pop ebx
+    add esp, 8  ; clean local variables
+    pop ebp     ; restore base ptr
+    ret 8
+String_endsWith ENDP
+
 END

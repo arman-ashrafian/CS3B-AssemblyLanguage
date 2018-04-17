@@ -26,6 +26,7 @@
     extern String_charAt@0:Near32
     extern String_startsWith_1@0:Near32
     extern String_startsWith_2@0:Near32
+    extern String_endsWith@0:Near32
 
 ; Symplify External Procedure Names
     String_length           equ String_length@0
@@ -37,6 +38,7 @@
     String_charAt           equ String_charAt@0
     String_startsWith_1     equ String_startsWith_1@0
     String_startsWith_2     equ String_startsWith_2@0
+    String_endsWith         equ String_endsWith@0
 
 ; Data Segment
     .data
@@ -107,9 +109,7 @@
     bCharAt             byte    ?          ; current CharAt value
     bStartsWith1        byte    ?          ; bool value for startsWith1 procedure
     bStartsWith2        byte    ?          ; bool value for startsWith2 procedure
-
-    ; testing data
-    strMyName byte "Arman",0
+    bEndsWith           byte    ?          ; bool value for endsWith procedure
 
 .code
 ;**********************************************
@@ -227,7 +227,13 @@ PrintMenu PROC
     call NewLine
 
     ; <12> String ends with
-    invoke putstring, addr strStringEndWith 
+    invoke putstring, addr strStringEndWith
+    invoke putstring, addr strCurrently 
+    .IF bEndsWith == 0
+        invoke putstring, addr strFalse
+    .ELSE
+        invoke putstring, addr strTrue
+    .ENDIF
     call NewLine
 
     ; <13> QUIT
@@ -303,6 +309,8 @@ loopWithoutMenu:
     je startsWith1
     cmp eax, 11
     je startsWith2
+    cmp eax, 12
+    je endsWith
 
     cmp eax, 13
     je quit
@@ -470,6 +478,14 @@ startsWith2:
     push offset strString2
     call String_startsWith_2
     mov bStartsWith2, al
+    jmp menuLoop
+
+; <12> Ends With
+endsWith:
+    push offset strString1
+    push offset strString2
+    call String_endsWith
+    mov bEndsWith, al
     jmp menuLoop
 
 invalidMenuOption:
