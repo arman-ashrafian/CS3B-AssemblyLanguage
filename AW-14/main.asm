@@ -40,14 +40,6 @@ String_length ENDP              ; end String_length function
 
 _start:	
     call	Clrscr
-    invoke putstring, addr strPrompt
-    invoke getstring, addr strString, 50    ; get option
-    push offset strString
-    call String_length
-    add esp, 4
-
-    invoke putch, 10
-    call WriteDec
 
     invoke ExitProcess, 0
 end _start
