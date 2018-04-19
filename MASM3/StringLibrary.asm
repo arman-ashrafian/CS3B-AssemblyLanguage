@@ -194,7 +194,6 @@ String_copy ENDP
 ; - return address of a newly allocated string of bytes 
 ;***********************************************************************
 String_substring_1 PROC Near32
-    ;int 3
     push ebp
     mov ebp, esp    ; new stack frame
 

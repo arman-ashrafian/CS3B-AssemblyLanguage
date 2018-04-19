@@ -110,90 +110,186 @@
     bStartsWith1        byte    ?          ; bool value for startsWith1 procedure
     bStartsWith2        byte    ?          ; bool value for startsWith2 procedure
     bEndsWith           byte    ?          ; bool value for endsWith procedure
+    strEmptyString      byte    ?          ; empty string
+
+    ; last menu option
+    dLastMenuOption     dword   ?
 
 .code
+;**********************************************
+; DisplayChange(String:dword,MenuOp:dword)
+; - display current value in menu
+;**********************************************
+DisplayChange PROC
+    push ebp
+    mov ebp, esp
+
+    ; preserve registers
+    push ebx
+    push ecx
+
+    ; arguments
+    string equ [ebp+12]
+    menuOp equ [ebp+8]
+
+    mov ebx, menuOp
+    mov ecx, dLastMenuOption
+
+    .IF ebx == ecx
+        mov eax, lightRed
+        call SetTextColor
+        invoke putstring, string
+        mov eax, cyan
+        call SetTextColor
+    .ELSE
+        invoke putstring, string
+    .ENDIF
+
+    pop ecx
+    pop ebx
+    pop ebp
+    ret 8
+DisplayChange ENDP
+
+
 ;**********************************************
 ; PrintMenu
 ; - display menu options
 ;**********************************************
 PrintMenu PROC
     invoke putstring, addr strMASMHead
-    
+    mov ebx, dLastMenuOption
+
     ; <1> Set String 1
     invoke putstring, addr strSetString1
     invoke putstring, addr strCurrently
-    invoke putstring, addr strString1
+    push offset strString1
+    push 1
+    call DisplayChange
     call NewLine
 
     ; <2> Set String 2
     invoke putstring, addr strSetString2
     invoke putstring, addr strCurrently
-    invoke putstring, addr strString2
+    push offset strString2
+    push 2
+    call DisplayChange
     call NewLine
 
     ; <3> String Length
     invoke putstring, addr strStringLength
     invoke putstring, addr strCurrently
-    invoke putstring, addr strCurrentLength
+    push offset strCurrentLength
+    push 3
+    call DisplayChange
     call NewLine
 
     ; <4> String Equal
     invoke putstring, addr strStringEquals
     invoke putstring, addr strCurrently
     .IF bCurrentEqual == 1
-        invoke putstring, addr strTrue
+        push offset strTrue
     .ELSE
-        invoke putstring, addr strFalse
+        push offset strFalse
     .ENDIF
+    push 4
+    call DisplayChange
     call NewLine
 
     ; <5> String Equal Ignore Case
     invoke putstring, addr strStringEqualsIC
     invoke putstring, addr strCurrently
     .IF bCurrentEqualIC == 1
-        invoke putstring, addr strTrue
+        push offset strTrue
     .ELSE
-        invoke putstring, addr strFalse
+        push offset strFalse
     .ENDIF
+    push 5
+    call DisplayChange
     call NewLine
 
     ; <6> Copy String
     invoke putstring, addr strStringCopy
-    invoke putch, '&'
-    mov eax, dCopiedHex
-    call WriteHex
+    .IF ebx == 6 
+        mov eax, lightRed
+        call SetTextColor
+        invoke putch, '&'
+        mov eax, dCopiedHex
+        call WriteHex
+        mov eax, cyan
+        call SetTextColor
+        mov eax, dCopiedHex
+    .ELSE
+        invoke putch, '&'
+        mov eax, dCopiedHex
+        call WriteHex
+    .ENDIF
     invoke putch, ' '
     invoke putch, ' '
     invoke putstring, addr strCurrently
     .IF eax != 0
-        invoke putstring, eax
+        push eax
+    .ELSE
+        push offset strEmptyString
     .ENDIF
+    push 6
+    call DisplayChange
     call NewLine
 
     ; <7> Substring 1
     invoke putstring, addr strStringSub1
-    invoke putch, '&'
-    mov eax, dSub1Hex
-    call WriteHex
+    .IF ebx == 7
+        mov eax, lightRed
+        call SetTextColor
+        invoke putch, '&'
+        mov eax, dSub1Hex
+        call WriteHex
+        mov eax, cyan
+        call SetTextColor
+        mov eax, dSub1Hex
+    .ELSE
+        invoke putch, '&'
+        mov eax, dSub1Hex
+        call WriteHex
+    .ENDIF
     invoke putch, ' '
     invoke putch, ' '
     invoke putstring, addr strCurrently
     .IF eax != 0
-        invoke putstring, eax
+        push eax
+    .ELSE
+        push offset strEmptyString
     .ENDIF
+    push 7
+    call DisplayChange
     call NewLine
 
     ; <8> Substring 2
     invoke putstring, addr strStringSub2
-    invoke putch, '&'
-    mov eax, dSub2Hex
-    call WriteHex
+    .IF ebx == 8
+        mov eax, lightRed
+        call SetTextColor
+        invoke putch, '&'
+        mov eax, dSub2Hex
+        call WriteHex
+        mov eax, cyan
+        call SetTextColor
+        mov eax, dSub2Hex
+    .ELSE
+        invoke putch, '&'
+        mov eax, dSub2Hex
+        call WriteHex
+    .ENDIF
     invoke putch, ' '
     invoke putch, ' '
     invoke putstring, addr strCurrently
     .IF eax != 0
-        invoke putstring, eax
+        push eax
+    .ELSE
+        push offset strEmptyString
     .ENDIF
+    push 8
+    call DisplayChange
     call NewLine
 
     ; <9> Char at
@@ -201,8 +297,16 @@ PrintMenu PROC
     invoke putstring, addr strCurrently
     .IF bCharAt == 0
         invoke putstring, addr strNull
-    .ELSE 
-        invoke putch, bCharAt
+    .ELSE
+        .IF ebx == 9
+            mov eax, lightRed
+            call SetTextColor
+            invoke putch, bCharAt
+            mov eax, cyan
+            call SetTextColor
+        .ELSE
+            invoke putch, bCharAt
+        .ENDIF
     .ENDIF
     call NewLine
 
@@ -210,30 +314,36 @@ PrintMenu PROC
     invoke putstring, addr strStringStarts1
     invoke putstring, addr strCurrently
     .IF bStartsWith1 == 0
-        invoke putstring, addr strFalse
+        push offset strFalse
     .ELSE
-        invoke putstring, addr strTrue
+        push offset strTrue
     .ENDIF
+    push 10
+    call DisplayChange
     call NewLine
 
     ; <11> String starts 2
     invoke putstring, addr strStringStarts2
     invoke putstring, addr strCurrently
     .IF bStartsWith2 == 0
-        invoke putstring, addr strFalse
+        push offset strFalse
     .ELSE
-        invoke putstring, addr strTrue
+        push offset strTrue
     .ENDIF
+    push 11
+    call DisplayChange
     call NewLine
 
     ; <12> String ends with
     invoke putstring, addr strStringEndWith
     invoke putstring, addr strCurrently 
     .IF bEndsWith == 0
-        invoke putstring, addr strFalse
+        push offset strFalse
     .ELSE
-        invoke putstring, addr strTrue
+        push offset strTrue
     .ENDIF
+    push 12
+    call DisplayChange
     call NewLine
 
     ; <13> QUIT
@@ -286,6 +396,7 @@ loopWithoutMenu:
     call SetTextColor
 
     call PromptUser
+    mov dLastMenuOption, eax
 
     cmp eax, 1
     je setString1
