@@ -25,7 +25,7 @@ strMenuHeading      BYTE "                MASM 4 TEXT EDITOR                ", 1
 strMenuOptions1     BYTE "<1> View All Strings",10,10,
                          "<2> Add String",10,
                          "    <a> from Keyboard",10,
-                         "    <b> from File (input.txt)",10,10,
+                         "    <b> from File",10,10,
                          "<3> Delete String given index #",10,10,0
 strMenuOptions2     BYTE "<4> Edit String given index #",10,10,
                          "<5> String search. Returns all strings matching given substring (ignoring case)",10,10,
@@ -33,41 +33,13 @@ strMenuOptions2     BYTE "<4> Edit String given index #",10,10,
                          "<7> Quit",10,0
 strMenuChoicePrompt BYTE  "Choice (1-7): ",0
 strMenuChoice       BYTE 3 dup(?)
+strStringInput      BYTE 501 dup(?)
+strFilename         BYTE 20 dup(?)
 
 dMemConsumption     DWORD 0
 
-
-
-
 ; ---- CODE ----
 .code
-
-;**********************************************
-PrintMenu PROC
-; Clear screen & display menu
-;**********************************************
-    call Clrscr
-    invoke putstring, addr strMenuHeading
-    mov eax, dMemConsumption
-    call WriteDec
-    mWrite " bytes"
-    call Crlf
-    invoke putstring, addr strMenuOptions1
-    invoke putstring, addr strMenuOptions2
-    ret
-PrintMenu ENDP
-
-;*************************************************
-PromptUser PROC
-; - prompt user and store int input in EAX
-;*************************************************
-    invoke putstring, addr strMenuChoicePrompt
-    invoke getstring, addr strMenuChoice, 2
-    call Crlf
-    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
-    ret
-PromptUser ENDP
-
 ;**********************************************
 ; *********** Program Entry Point ************
 ;**********************************************
@@ -101,7 +73,26 @@ MainLoopNoPrompt:
 ViewAllStrings:
     ; TODO
 AddString:
-    ; TODO
+    mWrite "From keyboard <a> or file <b>: "
+    invoke getstring, addr strMenuChoice, 2
+    ; Input From Keyboard
+    .IF(strMenuChoice == 'a')
+        call Crlf
+        mWrite "Input (500 character limit): "
+        call Crlf
+        invoke getstring, addr strStringInput, 500
+    ; Input From File
+    .ELSEIF(strMenuChoice == 'b')
+        call Crlf
+        mWrite "Filename: "
+        invoke getstring, addr strFilename, 19
+    .ELSE
+        mWrite "Invalid Input!"
+        call Crlf
+        jmp AddString
+    .ENDIF
+    jmp MainLoopWithPrompt
+
 DeleteString:
     ; TODO
 EditString:
@@ -116,5 +107,33 @@ InvalidInput:
     jmp MainLoopNoPrompt
 Quit:
     invoke ExitProcess, 0
+
+; --------- Procedures ----------
+
+;**********************************************
+PrintMenu PROC
+; Clear screen & display menu
+;**********************************************
+    call Clrscr
+    invoke putstring, addr strMenuHeading
+    mov eax, dMemConsumption
+    call WriteDec
+    mWrite " bytes"
+    call Crlf
+    invoke putstring, addr strMenuOptions1
+    invoke putstring, addr strMenuOptions2
+    ret
+PrintMenu ENDP
+
+;*************************************************
+PromptUser PROC
+; - prompt user and store int input in EAX
+;*************************************************
+    invoke putstring, addr strMenuChoicePrompt
+    invoke getstring, addr strMenuChoice, 2
+    call Crlf
+    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
+    ret
+PromptUser ENDP
 
 end _start ; end program
