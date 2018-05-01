@@ -17,8 +17,21 @@
     INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
     INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
 
+; External Procedures
+extern String_copy@0:Near32
+String_copy equ String_copy@0
+
+; Linked List Node
+Node Struct 
+    strPtr DWORD ?
+    next   DWORD ?
+Node Ends
+
+
 ; ---- DATA ----
 .data
+
+head                DWORD ?
 
 strMenuHeading      BYTE "                MASM 4 TEXT EDITOR                ", 10, 13,
                          "	 Data Structure Memory Consumption: ",0
@@ -33,8 +46,9 @@ strMenuOptions2     BYTE "<4> Edit String given index #",10,10,
                          "<7> Quit",10,0
 strMenuChoicePrompt BYTE  "Choice (1-7): ",0
 strMenuChoice       BYTE 3 dup(?)
-strStringInput      BYTE 501 dup(?)
+strStringInputBuff  BYTE 512 dup(?)
 strFilename         BYTE 20 dup(?)
+fileHandle          HANDLE ?
 
 dMemConsumption     DWORD 0
 
@@ -78,9 +92,11 @@ AddString:
     ; Input From Keyboard
     .IF(strMenuChoice == 'a')
         call Crlf
-        mWrite "Input (500 character limit): "
+        mWrite "Input: "
         call Crlf
-        invoke getstring, addr strStringInput, 500
+        invoke getstring, addr strStringInputBuff, 511
+        ; push offset strStringInputBuff
+        ; call String_copy
     ; Input From File
     .ELSEIF(strMenuChoice == 'b')
         call Crlf
