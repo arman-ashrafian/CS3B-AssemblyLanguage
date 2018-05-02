@@ -58,6 +58,8 @@ strMenuChoice       BYTE 3 dup(?)
 strStringInputBuff  BYTE 512 dup(?)
 strFilename         BYTE 20 dup(?)
 fileHandle          HANDLE ?
+fileSize            DWORD ?
+strFileBuff         BYTE 2000000 dup(?)
 
 linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
@@ -111,6 +113,7 @@ AddString:
         call Crlf
         mWrite "Filename: "
         mReadString strFilename
+        call GetInputFromFile
     .ELSE
         mWrite "Invalid Input!"
         call Crlf
@@ -254,6 +257,40 @@ done:
     call WaitMsg
     ret
 DisplayStrings ENDP
+
+;*************************************************
+GetInputFromFile PROC
+;*************************************************
+    ; Open the file for input.
+	mov	edx,OFFSET strFilename
+	call OpenInputFile
+	mov	fileHandle,eax
+
+    ; Check for errors.
+	cmp	eax,INVALID_HANDLE_VALUE        ; error opening file?
+	jne	file_ok                         ; no: skip
+	mWrite "Cannot open file"
+	jmp	quit                            ; and quit
+file_ok:
+    ; Read file into buffer
+    mov edx, OFFSET strFileBuff
+    mov ecx, SIZEOF strFileBuff
+    call ReadFromFile
+    mov strFileBuff[eax],0      ; insert null terminator
+    mWrite "File Size: "
+    call WriteDec
+    call Crlf
+    call Crlf
+
+    ; display buffer
+    mWrite "File: "
+    call Crlf
+    mWriteString strFileBuff
+    call Crlf
+quit:
+    call WaitMsg
+    ret
+GetInputFromFile ENDP
 
 ;*************************************************
 ReadLine PROC
