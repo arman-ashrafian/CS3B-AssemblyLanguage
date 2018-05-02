@@ -21,7 +21,13 @@
 extern String_copy@0:Near32
 String_copy equ String_copy@0
 
+; HEAP SIZE
+HEAP_START = 2000000     ; 2MB
+HEAP_MAX  = 400000000   ; 4MB
+
+
 ; Linked List Node
+NODE_SIZE = 8 ; 8 bytes
 Node Struct 
     strPtr DWORD ?
     next   DWORD ?
@@ -31,7 +37,15 @@ Node Ends
 ; ---- DATA ----
 .data
 
-head                DWORD ?
+hHeap               HANDLE ?    ; Heap Handle
+
+; Linked List Stuff
+head 			    DWORD 	?
+tail 			    DWORD 	?
+currNod			    DWORD 	?
+prevNod			    DWORD 	?
+nextNod 		    DWORD 	?
+foundVar		    BYTE 	FALSE
 
 strMenuHeading      BYTE "                MASM 4 TEXT EDITOR                ", 10, 13,
                          "	 Data Structure Memory Consumption: ",0
@@ -59,7 +73,11 @@ dMemConsumption     DWORD 0
 ;**********************************************
 _start:
 
-    mov eax, 0                   ; for OllyDebug
+    mov eax, 0   ; for OllyDebug
+    INVOKE HeapCreate, 0, HEAP_START, HEAP_MAX  ; create heap
+    mov hHeap, eax
+    call CreateNewNode
+    mov head, eax
 
 MainLoopWithPrompt:
     call PrintMenu
@@ -91,12 +109,7 @@ AddString:
     invoke getstring, addr strMenuChoice, 2
     ; Input From Keyboard
     .IF(strMenuChoice == 'a')
-        call Crlf
-        mWrite "Input: "
-        call Crlf
-        invoke getstring, addr strStringInputBuff, 511
-        ; push offset strStringInputBuff
-        ; call String_copy
+        call GetInputFromKeyboard
     ; Input From File
     .ELSEIF(strMenuChoice == 'b')
         call Crlf
@@ -151,5 +164,39 @@ PromptUser PROC
     invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
     ret
 PromptUser ENDP
+
+;*************************************************
+CreateNewNode PROC
+;*************************************************
+	INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
+	mov tail,eax
+	
+	ret
+createNewNode ENDP
+
+;*************************************************
+GetInputFromKeyboard PROC
+;*************************************************
+    ret
+GetInputFromKeyboard ENDP
+
+
+;*************************************************
+ReadLine PROC
+; - read byte-by-byte until reach end of line
+;*************************************************
+    mov ecx, 0      ; counter
+readLoop:
+    call ReadChar   ; reads char into AL
+    call WriteChar
+    .IF(al == 13)   ; end of line
+        jmp done
+    .ELSE
+        mov strStringInputBuff[ecx],al
+    .ENDIF
+    jmp readLoop 
+done:
+    ret
+ReadLine ENDP
 
 end _start ; end program
