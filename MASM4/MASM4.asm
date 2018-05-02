@@ -15,10 +15,13 @@ option casemap :none
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
 INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
+INCLUDE ..\macros\Bailey.inc
 
 ; External Procedures
 extern String_copy@0:Near32
+extern String_length@0:Near32
 String_copy equ String_copy@0
+String_length equ String_length@0
 
 ; HEAP SIZE
 HEAP_START = 2000000     ; 2MB
@@ -162,7 +165,12 @@ GetInputFromKeyboard PROC
     mov al, 10
     call WriteChar
     mReadString strStringInputBuff
-    ; add dMemConsumption, eax
+
+    push offset strStringInputBuff
+    call String_length
+    inc eax
+
+    add dMemConsumption, eax
     push offset strStringInputBuff
     call String_copy
     push eax
@@ -179,25 +187,28 @@ AppendStringToLinkedList PROC
     mov ebp, esp
 
     push ebx        ; preserve 
+    push edx
 
     ; args
     string equ [ebp + 8]   ; string to append
 
-    mov ebx, head
+    mov ebx, head       ; EBX = head
+    mov edx, string     ; EDX = pointer to string
     .IF(ebx == 0) ; EMPTY LIST
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
         mov head, eax
-        ; mov (Node PTR [eax]).strPtr, DWORD PTR string
-        ; mov (Node PTR [eax]).next, 0
+        mov (Node PTR [eax]).strPtr, edx
+        mov (Node PTR [eax]).next, 0
         inc linkedListCount
     .ELSE
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
-        ; mov (Node PTR [eax]).strPtr, DWORD PTR string
-        ; mov (Node PTR [eax]).next, DWORD PTR head
+        mov (Node PTR [eax]).strPtr, edx
+        mov (Node PTR [eax]).next, ebx
         mov head, eax
         inc linkedListCount
     .ENDIF
 
+    pop edx
     pop ebx
     pop ebp
     ret 4
