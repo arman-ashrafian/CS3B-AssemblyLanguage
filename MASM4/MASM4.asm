@@ -15,7 +15,7 @@ option casemap :none
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
 INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
-INCLUDE ..\macros\Bailey.inc
+INCLUDE ..\macros\Bailey.inc       ; Bailey Macros
 
 ; External Procedures
 extern String_copy@0:Near32
@@ -98,7 +98,8 @@ MainLoopNoMenu:
 
 
 ViewAllStrings:
-    ; TODO
+    call DisplayStrings
+    jmp MainLoopWithMenu
 AddString:
     mWrite "From keyboard <a> or file <b>: "
     mReadString strMenuChoice
@@ -116,7 +117,6 @@ AddString:
         jmp AddString
     .ENDIF
     jmp MainLoopWithMenu
-
 DeleteString:
     ; TODO
 EditString:
@@ -195,16 +195,30 @@ AppendStringToLinkedList PROC
     mov ebx, head       ; EBX = head
     mov edx, string     ; EDX = pointer to string
     .IF(ebx == 0) ; EMPTY LIST
+        push ebx
+        push edx
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
+        pop edx
+        pop ebx
         mov head, eax
         mov (Node PTR [eax]).strPtr, edx
         mov (Node PTR [eax]).next, 0
         inc linkedListCount
     .ELSE
+        push ebx    ; save registers because HeapAlloc will overwrite
+        push edx
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
-        mov (Node PTR [eax]).strPtr, edx
-        mov (Node PTR [eax]).next, ebx
-        mov head, eax
+        pop edx     ; restore registers
+        pop ebx
+    traversalLoop:  ; traverse to end of linked list
+        cmp (Node PTR [ebx]).next, 0
+        je reachedEnd
+        mov ebx, (Node PTR [ebx]).next
+        jmp traversalLoop
+    reachedEnd:
+        mov (Node PTR [ebx]).next, eax      ; last node points to new node
+        mov (Node PTR [eax]).strPtr, edx    ; new node stores the string
+        mov (Node PTR [eax]).next, 0      ; new node points to NULL
         inc linkedListCount
     .ENDIF
 
@@ -214,6 +228,32 @@ AppendStringToLinkedList PROC
     ret 4
 AppendStringToLinkedList ENDP
 
+;*************************************************
+DisplayStrings PROC
+;*************************************************
+    mov ebx, head   ; EBX = head
+    cmp ebx, 0      ; check if list is empty
+    je done
+    mov eax, 0      ; index counter
+traversalLoop:
+    call WriteDec
+    mWrite " - "
+    inc eax
+    mov edx, (Node PTR [ebx]).strPtr
+    call WriteString
+    push eax
+    mov al, 10
+    call WriteChar
+    pop eax
+    mov ebx, (Node PTR [ebx]).next
+    .IF(ebx == 0)
+        jmp done
+    .ENDIF
+    jmp traversalLoop
+done:
+    call WaitMsg
+    ret
+DisplayStrings ENDP
 
 ;*************************************************
 ReadLine PROC
