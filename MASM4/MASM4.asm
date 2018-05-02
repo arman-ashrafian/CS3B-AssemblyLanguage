@@ -7,15 +7,15 @@
 ;**************************************************************************
 
 ; Dot Directives
-    .486
-    .model flat, STDCALL
-    .stack 4096
-    option casemap :none
+.486
+.model flat, STDCALL
+.stack 4096
+option casemap :none
 
 ; Include Libraries
-    INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
-    INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
-    INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
+INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
+INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
+INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
 
 ; External Procedures
 extern String_copy@0:Near32
@@ -33,19 +33,12 @@ Node Struct
     next   DWORD ?
 Node Ends
 
-
 ; ---- DATA ----
 .data
 
 hHeap               HANDLE ?    ; Heap Handle
 
-; Linked List Stuff
-head 			    DWORD 	?
-tail 			    DWORD 	?
-currNod			    DWORD 	?
-prevNod			    DWORD 	?
-nextNod 		    DWORD 	?
-foundVar		    BYTE 	FALSE
+head 			    DWORD  ?    ; Linked List pointer
 
 strMenuHeading      BYTE "                MASM 4 TEXT EDITOR                ", 10, 13,
                          "	 Data Structure Memory Consumption: ",0
@@ -64,6 +57,7 @@ strStringInputBuff  BYTE 512 dup(?)
 strFilename         BYTE 20 dup(?)
 fileHandle          HANDLE ?
 
+linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
 
 ; ---- CODE ----
@@ -76,8 +70,7 @@ _start:
     mov eax, 0   ; for OllyDebug
     INVOKE HeapCreate, 0, HEAP_START, HEAP_MAX  ; create heap
     mov hHeap, eax
-    call CreateNewNode
-    mov head, eax
+    mov head, 0     ; head points to null
 
 MainLoopWithPrompt:
     call PrintMenu
@@ -166,19 +159,52 @@ PromptUser PROC
 PromptUser ENDP
 
 ;*************************************************
-CreateNewNode PROC
-;*************************************************
-	INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
-	mov tail,eax
-	
-	ret
-createNewNode ENDP
-
-;*************************************************
 GetInputFromKeyboard PROC
 ;*************************************************
+    invoke putch, 10    ; newline
+    mov edx, OFFSET strStringInputBuff
+    mov ecx, SIZEOF strStringInputBuff
+    call ReadString     ; store string into input buffer
+    add dMemConsumption, eax
+    push offset strStringInputBuff
+    call String_copy
+    push eax
+    call AppendStringToLinkedList
+
     ret
 GetInputFromKeyboard ENDP
+
+;*************************************************
+AppendStringToLinkedList PROC
+; - add string to end of list
+;*************************************************
+    push ebp        ; create stack frame
+    mov ebp, esp
+
+    push ebx        ; preserve 
+
+    ; args
+    string equ [ebp + 8]   ; string to append
+
+    mov ebx, head
+    .IF(ebx == 0) ; EMPTY LIST
+        INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
+        mov head, eax
+        mov (Node PTR [eax]).strPtr, DWORD PTR string
+        mov (Node PTR [eax]).next, 0
+        inc linkedListCount
+    .ELSE
+        INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
+        mov (Node PTR [eax]).strPtr, DWORD PTR string
+        mov (Node PTR [eax]).next, DWORD PTR head
+        mov head, eax
+        inc linkedListCount
+    .ENDIF
+
+    pop ebx
+    pop ebp
+    ret 4
+AppendStringToLinkedList ENDP
 
 
 ;*************************************************
