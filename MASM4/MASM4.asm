@@ -15,7 +15,6 @@ option casemap :none
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
 INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
-INCLUDE ..\macros\Bailey.inc       ; Bailey Prototypes
 
 ; External Procedures
 extern String_copy@0:Near32
@@ -72,9 +71,9 @@ _start:
     mov hHeap, eax
     mov head, 0     ; head points to null
 
-MainLoopWithPrompt:
+MainLoopWithMenu:
     call PrintMenu
-MainLoopNoPrompt:
+MainLoopNoMenu:
     call PromptUser
 
     cmp eax, 1
@@ -99,7 +98,7 @@ ViewAllStrings:
     ; TODO
 AddString:
     mWrite "From keyboard <a> or file <b>: "
-    invoke getstring, addr strMenuChoice, 2
+    mReadString strMenuChoice
     ; Input From Keyboard
     .IF(strMenuChoice == 'a')
         call GetInputFromKeyboard
@@ -107,13 +106,13 @@ AddString:
     .ELSEIF(strMenuChoice == 'b')
         call Crlf
         mWrite "Filename: "
-        invoke getstring, addr strFilename, 19
+        mReadString strFilename
     .ELSE
         mWrite "Invalid Input!"
         call Crlf
         jmp AddString
     .ENDIF
-    jmp MainLoopWithPrompt
+    jmp MainLoopWithMenu
 
 DeleteString:
     ; TODO
@@ -126,7 +125,7 @@ SaveFile:
 InvalidInput:
     mWrite "Invalid Input!"
     call Crlf
-    jmp MainLoopNoPrompt
+    jmp MainLoopNoMenu
 Quit:
     invoke ExitProcess, 0
 
@@ -137,13 +136,13 @@ PrintMenu PROC
 ; Clear screen & display menu
 ;**********************************************
     call Clrscr
-    invoke putstring, addr strMenuHeading
+    mWriteString strMenuHeading
     mov eax, dMemConsumption
     call WriteDec
     mWrite " bytes"
     call Crlf
-    invoke putstring, addr strMenuOptions1
-    invoke putstring, addr strMenuOptions2
+    mWriteString strMenuOptions1
+    mWriteString strMenuOptions2
     ret
 PrintMenu ENDP
 
@@ -151,21 +150,19 @@ PrintMenu ENDP
 PromptUser PROC
 ; - prompt user and store int input in EAX
 ;*************************************************
-    invoke putstring, addr strMenuChoicePrompt
-    invoke getstring, addr strMenuChoice, 2
+    mWriteString strMenuChoicePrompt
+    call ReadInt
     call Crlf
-    invoke ascint32, addr strMenuChoice  ; convert menu choice to int (EAX)
     ret
 PromptUser ENDP
 
 ;*************************************************
 GetInputFromKeyboard PROC
 ;*************************************************
-    invoke putch, 10    ; newline
-    mov edx, OFFSET strStringInputBuff
-    mov ecx, SIZEOF strStringInputBuff
-    call ReadString     ; store string into input buffer
-    add dMemConsumption, eax
+    mov al, 10
+    call WriteChar
+    mReadString strStringInputBuff
+    ; add dMemConsumption, eax
     push offset strStringInputBuff
     call String_copy
     push eax
@@ -190,13 +187,13 @@ AppendStringToLinkedList PROC
     .IF(ebx == 0) ; EMPTY LIST
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
         mov head, eax
-        mov (Node PTR [eax]).strPtr, DWORD PTR string
-        mov (Node PTR [eax]).next, 0
+        ; mov (Node PTR [eax]).strPtr, DWORD PTR string
+        ; mov (Node PTR [eax]).next, 0
         inc linkedListCount
     .ELSE
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
-        mov (Node PTR [eax]).strPtr, DWORD PTR string
-        mov (Node PTR [eax]).next, DWORD PTR head
+        ; mov (Node PTR [eax]).strPtr, DWORD PTR string
+        ; mov (Node PTR [eax]).next, DWORD PTR head
         mov head, eax
         inc linkedListCount
     .ENDIF
