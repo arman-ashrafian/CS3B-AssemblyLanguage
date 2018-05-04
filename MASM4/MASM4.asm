@@ -12,6 +12,8 @@
 .stack 4096
 option casemap :none
 
+GetFileSize PROTO STDCALL :DWORD, :DWORD
+
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
 INCLUDE ..\..\Irvine\Macros.inc    ; Irvine Macros
@@ -55,11 +57,14 @@ strMenuOptions2     BYTE "<4> Edit String given index #",10,10,
                          "<7> Quit",10,0
 strMenuChoicePrompt BYTE  "Choice (1-7): ",0
 strMenuChoice       BYTE 3 dup(?)
+
 strStringInputBuff  BYTE 512 dup(?)
-strFilename         BYTE 20 dup(?)
-fileHandle          HANDLE ?
+
+; File Stuff
+strFilename         BYTE  20 dup(?)
+fileHandle          DWORD ?
 fileSize            DWORD ?
-strFileBuff         BYTE 2000000 dup(?)
+fileBuffPtr         DWORD ?
 
 linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
@@ -73,6 +78,7 @@ _start:
 
     mov eax, 0   ; for OllyDebug
     INVOKE HeapCreate, 0, HEAP_START, HEAP_MAX  ; create heap
+
     mov hHeap, eax
     mov head, 0     ; head points to null
 
@@ -261,32 +267,28 @@ DisplayStrings ENDP
 ;*************************************************
 GetInputFromFile PROC
 ;*************************************************
-    ; Open the file for input.
-	mov	edx,OFFSET strFilename
-	call OpenInputFile
-	mov	fileHandle,eax
+    ; open (or create) file
+    invoke CreateFile,ADDR strFilename,GENERIC_READ,0,0,\
+        OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0
 
-    ; Check for errors.
-	cmp	eax,INVALID_HANDLE_VALUE        ; error opening file?
-	jne	file_ok                         ; no: skip
-	mWrite "Cannot open file"
-	jmp	quit                            ; and quit
-file_ok:
-    ; Read file into buffer
-    mov edx, OFFSET strFileBuff
-    mov ecx, SIZEOF strFileBuff
+    ; get filesize into EAX
+    mov fileHandle, eax 
+    invoke GetFileSize, eax, 0
+    inc eax ; make room for null
+    mov fileSize,eax
+
+    ; allocate memory on heap for file buffer
+    INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, eax
+    mov fileBuffPtr, eax
+
+    mov edx, eax        ; EDX = offset of file buffer
+    mov eax, fileHandle
+    mov ecx, fileSize
     call ReadFromFile
-    mov strFileBuff[eax],0      ; insert null terminator
-    mWrite "File Size: "
-    call WriteDec
-    call Crlf
-    call Crlf
+    call WriteWindowsMsg
 
-    ; display buffer
-    mWrite "File: "
-    call Crlf
-    mWriteString strFileBuff
-    call Crlf
+    mov edx, fileBuffPtr
+    call WriteString
 quit:
     call WaitMsg
     ret
