@@ -37,7 +37,7 @@ Node Struct
     next   DWORD ?
 Node Ends
 
-; ---- DATA ----
+; ------------------------- DATA -----------------------------------
 .data
 
 hHeap               HANDLE ?    ; Heap Handle
@@ -69,7 +69,7 @@ fileBuffPtr         DWORD ?
 linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
 
-; ---- CODE ----
+; ----------------------- CODE -----------------------------
 .code
 ;**********************************************
 ; *********** Program Entry Point ************
@@ -141,7 +141,7 @@ InvalidInput:
 Quit:
     invoke ExitProcess, 0
 
-; --------- Procedures ----------
+; ------------------------------ Procedures ----------------------------
 
 ;**********************************************
 PrintMenu PROC
@@ -170,16 +170,12 @@ PromptUser ENDP
 
 ;*************************************************
 GetInputFromKeyboard PROC
+; - prompts user for input, appends to linked list
 ;*************************************************
     mov al, 10
     call WriteChar
+    mWrite "Input: "
     mReadString strStringInputBuff
-
-    push offset strStringInputBuff
-    call String_length
-    inc eax
-
-    add dMemConsumption, eax
     push offset strStringInputBuff
     call String_copy
     push eax
@@ -190,20 +186,27 @@ GetInputFromKeyboard ENDP
 
 ;*************************************************
 AppendStringToLinkedList PROC
-; - add string to end of list
+; - add string to end of list & add string length
+;   and node size to total memory consumption
 ;*************************************************
-    push ebp        ; create stack frame
+    push ebp                    ; create stack frame
     mov ebp, esp
 
-    push ebx        ; preserve 
+    push ebx                    ; preserve 
     push edx
 
     ; args
-    string equ [ebp + 8]   ; string to append
+    string equ [ebp + 8]        ; address of string to append
+
+    push string
+    call String_length          ; get string length
+    inc eax                     ; +1 for null
+    add eax, NODE_SIZE          ; add size of node 
+    add dMemConsumption, eax    ; add to total memory consumption
 
     mov ebx, head       ; EBX = head
     mov edx, string     ; EDX = pointer to string
-    .IF(ebx == 0) ; EMPTY LIST
+    .IF(ebx == 0)       ; EMPTY LIST ?
         push ebx
         push edx
         INVOKE HeapAlloc, hHeap, HEAP_ZERO_MEMORY, NODE_SIZE
@@ -239,6 +242,8 @@ AppendStringToLinkedList ENDP
 
 ;*************************************************
 DisplayStrings PROC
+; - loops through linked list and displays index 
+;   and string
 ;*************************************************
     mov ebx, head   ; EBX = head
     cmp ebx, 0      ; check if list is empty
@@ -266,7 +271,12 @@ DisplayStrings ENDP
 
 ;*************************************************
 GetInputFromFile PROC
+; - opens file, gets file size, allocates memory
+;   for the buffer, reads file into buffer,
+;   appends to linked list then deletes the buffer.
 ;*************************************************
+; TODO: handle if file does not exist
+
     ; open (or create) file
     invoke CreateFile,ADDR strFilename,GENERIC_READ,0,0,\
         OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0
@@ -305,10 +315,10 @@ AddFileContentsToList PROC
 ; - create new string on every new line
 ;*************************************************
     ;int 3
-    push ebp       ; new stack frame
+    push ebp                ; new stack frame
     mov ebp, esp
 
-    push ecx    ; preserve registers
+    push ecx                ; preserve registers
     push edx
     push ebx
 
@@ -341,8 +351,6 @@ innerLoop:
     .ELSE
         jmp innerLoop
     .ENDIF
-    
-
 done:
     pop ebx
     pop edx
