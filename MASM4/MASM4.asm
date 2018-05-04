@@ -317,7 +317,8 @@ GetInputFromFile PROC
     mov ecx, fileSize
     mov byte ptr [edx+ecx], 0 
 
-    call AddFileContentsToList
+    push fileBuffPtr
+    call AddBufferContentsToList
     invoke HeapFree, hHeap, 0, fileBuffPtr  ; FREE the buffer
 quit:
     call WaitMsg
@@ -326,8 +327,8 @@ quit:
 GetInputFromFile ENDP
 
 ;*************************************************
-AddFileContentsToList PROC
-; - add contents of file buffer to linked list
+AddBufferContentsToList PROC
+; - add contents of buffer to linked list
 ; - create new string on every new line
 ;*************************************************
     push ebp                ; new stack frame
@@ -337,12 +338,12 @@ AddFileContentsToList PROC
     push edx
     push ebx
 
-    mov edx, fileBuffPtr    ; EDX = *filebuffer
+    mov edx, [ebp+8]        ; EDX = *buffer
 
 outerLoop:
     mov ecx, 0                          ; count = 0
 innerLoop:
-    mov al, [edx+ecx]                   ; AL = *fileBuffPtr[ecx]
+    mov al, [edx+ecx]                   ; AL = *buffer[ecx]
     mov strStringInputBuff[ecx], al     ; buffer[count] = AL
     inc ecx                             ; count++
     .IF(al == 13)                       ; reached end of line ?
@@ -371,12 +372,13 @@ done:
     pop edx
     pop ecx
     pop ebp
-    ret
-AddFileContentsToList ENDP
+    ret 4
+AddBufferContentsToList ENDP
 
 ;*************************************************
 GetInputFromClipboard PROC
-; - 
+; - get data in clipboard and append buffer to 
+;   to list
 ;*************************************************
     push ebp                    ; new stack frame
     mov ebp, esp
@@ -388,6 +390,10 @@ GetInputFromClipboard PROC
     call Crlf
     call WriteString            ; display contents of clipboard buffer
     call Crlf
+
+    push hClipboard
+    call AddBufferContentsToList; append clipboard buffer to list
+
     invoke CloseClipboard       ; close clipboard buffer
 
     call WaitMsg                ; display wait msg
