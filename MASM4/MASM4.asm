@@ -12,7 +12,12 @@
 .stack 4096
 option casemap :none
 
-GetFileSize PROTO STDCALL :DWORD, :DWORD
+; Prototypes
+GetFileSize         PROTO STDCALL :DWORD, :DWORD
+OpenClipboard       PROTO STDCALL :DWORD
+GetClipboardData    PROTO STDCALL :DWORD
+GlobalSize          PROTO STDCALL :DWORD
+CloseClipboard      PROTO STDCALL
 
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
@@ -44,12 +49,15 @@ hHeap               HANDLE ?    ; Heap Handle
 
 head 			    DWORD  ?    ; Linked List pointer
 
+hClipboard          DWORD ?    ; clipboard handle
+
 strMenuHeading      BYTE "                MASM 4 TEXT EDITOR                ", 10, 13,
                          "	 Data Structure Memory Consumption: ",0
 strMenuOptions1     BYTE "<1> View All Strings",10,10,
                          "<2> Add String",10,
                          "    <a> from Keyboard",10,
-                         "    <b> from File",10,10,
+                         "    <b> from File",10,
+                         "    <c> from Clipboard",10,10,
                          "<3> Delete String given index #",10,10,0
 strMenuOptions2     BYTE "<4> Edit String given index #",10,10,
                          "<5> String search. Returns all strings matching given substring (ignoring case)",10,10,
@@ -109,7 +117,7 @@ ViewAllStrings:
     call DisplayStrings
     jmp MainLoopWithMenu
 AddString:
-    mWrite "From keyboard <a> or file <b>: "
+    mWrite "From keyboard <a>, file <b>, or clipboard <c>: "
     mReadString strMenuChoice
     ; Input From Keyboard
     .IF(strMenuChoice == 'a')
@@ -120,6 +128,9 @@ AddString:
         mWrite "Filename: "
         mReadString strFilename
         call GetInputFromFile
+    ; Input From Clipboard
+    .ELSEIF(strMenuChoice == 'c')
+        call GetInputFromClipboard
     .ELSE
         mWrite "Invalid Input!"
         call Crlf
@@ -275,11 +286,16 @@ GetInputFromFile PROC
 ;   for the buffer, reads file into buffer,
 ;   appends to linked list then deletes the buffer.
 ;*************************************************
-; TODO: handle if file does not exist
-
     ; open (or create) file
     invoke CreateFile,ADDR strFilename,GENERIC_READ,0,0,\
         OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0
+
+    ; check if file does not exist
+    .IF(eax == -1)
+        mWrite "File doe not exist!"
+        call Crlf
+        jmp quit
+    .ENDIF
 
     ; get filesize into EAX
     mov fileHandle, eax 
@@ -314,7 +330,6 @@ AddFileContentsToList PROC
 ; - add contents of file buffer to linked list
 ; - create new string on every new line
 ;*************************************************
-    ;int 3
     push ebp                ; new stack frame
     mov ebp, esp
 
@@ -358,5 +373,26 @@ done:
     pop ebp
     ret
 AddFileContentsToList ENDP
+
+;*************************************************
+GetInputFromClipboard PROC
+; - 
+;*************************************************
+    push ebp                    ; new stack frame
+    mov ebp, esp
+
+    invoke OpenClipboard, NULL  ; returns clipboard handle in EAX
+    invoke GetClipboardData, 1  ; get data as text
+    mov hClipboard, eax         ; save handle
+    mov edx, hClipboard
+    call Crlf
+    call WriteString            ; display contents of clipboard buffer
+    call Crlf
+    invoke CloseClipboard       ; close clipboard buffer
+
+    call WaitMsg                ; display wait msg
+    pop ebp
+    ret
+GetInputFromClipboard ENDP
 
 end _start ; end program
