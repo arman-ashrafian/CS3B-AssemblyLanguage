@@ -27,7 +27,7 @@ String_length equ String_length@0
 
 ; HEAP SIZE
 HEAP_START = 2000000     ; 2MB
-HEAP_MAX  = 400000000   ; 4MB
+HEAP_MAX  = 400000000   ; 400MB
 
 
 ; Linked List Node
