@@ -284,32 +284,71 @@ GetInputFromFile PROC
     mov edx, eax        ; EDX = offset of file buffer
     mov eax, fileHandle
     mov ecx, fileSize
-    call ReadFromFile
-    call WriteWindowsMsg
+    call ReadFromFile   ; Read file into buffer
 
+    ; add null terminator
     mov edx, fileBuffPtr
-    call WriteString
+    mov ecx, fileSize
+    mov byte ptr [edx+ecx], 0 
+
+    call AddFileContentsToList
+    invoke HeapFree, hHeap, 0, fileBuffPtr  ; FREE the buffer
 quit:
     call WaitMsg
+    invoke CloseHandle,fileHandle           ; close file
     ret
 GetInputFromFile ENDP
 
 ;*************************************************
-ReadLine PROC
-; - read byte-by-byte until reach end of line
+AddFileContentsToList PROC
+; - add contents of file buffer to linked list
+; - create new string on every new line
 ;*************************************************
-    mov ecx, 0      ; counter
-readLoop:
-    call ReadChar   ; reads char into AL
-    call WriteChar
-    .IF(al == 13)   ; end of line
+    ;int 3
+    push ebp       ; new stack frame
+    mov ebp, esp
+
+    push ecx    ; preserve registers
+    push edx
+    push ebx
+
+    mov edx, fileBuffPtr    ; EDX = *filebuffer
+
+outerLoop:
+    mov ecx, 0                          ; count = 0
+innerLoop:
+    mov al, [edx+ecx]                   ; AL = *fileBuffPtr[ecx]
+    mov strStringInputBuff[ecx], al     ; buffer[count] = AL
+    inc ecx                             ; count++
+    .IF(al == 13)                       ; reached end of line ?
+        add edx, ecx
+        inc edx
+        mov strStringInputBuff[ecx],0   ; add null terminator
+        push offset strStringInputBuff  
+        call String_copy                ; copy string into 
+        push eax
+        call AppendStringToLinkedList   ; append buffer to list
+        jmp outerLoop                   ; start over
+    .ELSEIF(al == 0)
+        add edx, ecx
+        inc edx
+        mov strStringInputBuff[ecx],0   ; add null terminator
+        push offset strStringInputBuff  
+        call String_copy                ; copy string into 
+        push eax
+        call AppendStringToLinkedList   ; append buffer to list
         jmp done
     .ELSE
-        mov strStringInputBuff[ecx],al
+        jmp innerLoop
     .ENDIF
-    jmp readLoop 
+    
+
 done:
+    pop ebx
+    pop edx
+    pop ecx
+    pop ebp
     ret
-ReadLine ENDP
+AddFileContentsToList ENDP
 
 end _start ; end program
