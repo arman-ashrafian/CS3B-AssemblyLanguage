@@ -318,7 +318,7 @@ traversalLoop:
         sub dMemConsumption, eax
         sub dMemConsumption, NODE_SIZE
 
-        invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string ptr
+        invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string
         invoke HeapFree, hHeap, 0, ebx                              ; delete node
         dec linkedListCount
         jmp quit
@@ -490,14 +490,50 @@ EditStringByIndex PROC
 ; - edit string given index #, replace with string
 ;   in strStringInputBuff
 ;*************************************************
+
+; TODO: calculate memory consumption for new string
+; - get length of o.g string
+; - subtract from memory consumption
+; - get length of new string
+; - add to memory consumption
+
     push ebp                        ; new stack frame
     mov ebp, esp
 
     index equ [ebp+8]               ; param
 
-    ; TODO - make it do its thang
+    push eax                        ; preserve registers
+    push ebx
+    push ecx
+    push edx
 
+    ; - traverse through list until reached the given node
+    ; - delete the string strPtr points to
+    ; - copy string in strStringInputBuffer
+    ; - set nodes strPtr to the new string
+
+    mov ecx, 0          ; ECX (counter) = 0
+    mov ebx, head       ; EBX = head
+    mov edx, index      ; EDX = index of node to edit
+traversalLoop:
+    .IF(ecx == edx)     ; counter == index ?
+        invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string
+        push ebx
+        push offset strStringInputBuff
+        call String_copy                                            ; EAX = address of new string
+        pop ebx
+        mov (Node PTR [ebx]).strPtr, eax
+        jmp quit
+    .ENDIF
+    mov ebx, (Node PTR [ebx]).next
+    inc ecx
+    jmp traversalLoop
+quit:
     call WaitMsg
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
     pop ebp
     ret 4
 EditStringByIndex ENDP
