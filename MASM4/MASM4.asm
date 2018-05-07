@@ -160,7 +160,10 @@ EditString:
 StringSearch:
     ; TODO
 SaveFile:
-    ; TODO
+    mWrite "Filename: "
+    mReadString strFilename
+    call SaveStringsToFile
+    jmp MainLoopWithMenu
 InvalidInput:
     mWrite "Invalid Input!"
     call Crlf
@@ -499,7 +502,7 @@ EditStringByIndex PROC
     push ebx
     push ecx
     push edx
-    
+
     ; - traverse through list until reached the given node
     ; - delete the string strPtr points to
     ; - copy string in strStringInputBuffer
@@ -542,5 +545,46 @@ quit:
     pop ebp
     ret 4
 EditStringByIndex ENDP
+
+;*************************************************
+SaveStringsToFile PROC
+; - traverse linked list and write each string
+;   to file on a new line
+;*************************************************
+    mov edx, offset strFilename
+    call CreateOutputFile
+
+    .IF(eax == INVALID_HANDLE_VALUE)
+        mWrite "Could not create output file"
+        jmp quit
+    .ENDIF
+    mov fileHandle, eax
+
+    mov ecx, 0
+    mov ebx, head
+    mov edx, linkedListCount
+traversalLoop:
+    .IF(ecx == linkedListCount)
+        jmp quit
+    .ENDIF
+
+    push (Node PTR [ebx]).strPtr        ; get buffer size w/o null
+    call String_length
+
+    push ecx                            ; save counter
+
+    mov ecx, eax                        ; write to file
+    mov edx, (Node PTR [ebx]).strPtr
+    mov eax, fileHandle
+    call WriteToFile
+
+    mov ebx, (Node PTR [ebx]).next
+    pop ecx                             ; restore counter
+    inc ecx
+    jmp traversalLoop
+
+quit:
+    ret
+SaveStringsToFile ENDP
 
 end _start ; end program
