@@ -490,13 +490,6 @@ EditStringByIndex PROC
 ; - edit string given index #, replace with string
 ;   in strStringInputBuff
 ;*************************************************
-
-; TODO: calculate memory consumption for new string
-; - get length of o.g string
-; - subtract from memory consumption
-; - get length of new string
-; - add to memory consumption
-
     push ebp                        ; new stack frame
     mov ebp, esp
 
@@ -506,7 +499,7 @@ EditStringByIndex PROC
     push ebx
     push ecx
     push edx
-
+    
     ; - traverse through list until reached the given node
     ; - delete the string strPtr points to
     ; - copy string in strStringInputBuffer
@@ -517,11 +510,23 @@ EditStringByIndex PROC
     mov edx, index      ; EDX = index of node to edit
 traversalLoop:
     .IF(ecx == edx)     ; counter == index ?
+        ; subtract o.g string length from memory consumption
+        push (Node PTR [ebx]).strPtr
+        call String_length
+        inc eax
+        sub dMemConsumption, eax
         invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string
-        push ebx
+
+        push ebx                                                    ; save EBX (pointer to node to edit)
+        ; add new string length to memory consumption
+        push offset strStringInputBuff
+        call String_length
+        inc eax
+        add dMemConsumption, eax
+
         push offset strStringInputBuff
         call String_copy                                            ; EAX = address of new string
-        pop ebx
+        pop ebx                                                     ; restore EBX
         mov (Node PTR [ebx]).strPtr, eax
         jmp quit
     .ENDIF
