@@ -263,15 +263,15 @@ AppendStringToLinkedList ENDP
 DeleteStringFromLinkedList PROC
 ; - delete by index
 ;*************************************************
-    push ebp
+    push ebp                                ; new stack frame
     mov ebp, esp
 
-    push eax
+    push eax                                ; preserve registers
     push ebx
     push ecx
     push edx
 
-    index equ [ebp+8]
+    index equ [ebp+8]                       ; param
 
     mov eax, index
     mov ebx, linkedListCount
@@ -279,15 +279,14 @@ DeleteStringFromLinkedList PROC
         jmp quit                            ; index is bigger than size of list,
     .ENDIF                                  ; and list is empty
 
-    mov ebx, head
-    mov ecx, 1
     ; EAX = index, EBX = *head, ECX = counter
-
+    mov ebx, head
+    mov ecx, 1      ; start at 1 because checking index 0 below
     .IF(eax == 0)                                                   ; delete first node
         mov edx, (Node PTR [ebx]).next
         mov head, edx
 
-        push (Node PTR [ebx]).strPtr
+        push (Node PTR [ebx]).strPtr                                ; calculate memory consumption of node
         call String_length
         inc eax
         sub dMemConsumption, eax
@@ -299,13 +298,13 @@ DeleteStringFromLinkedList PROC
         jmp quit
     .ENDIF
 traversalLoop:
-    mov edx, ebx
-    mov ebx, (Node PTR [ebx]).next
-    .IF(eax == ecx)
-        mov ecx, (Node PTR [ebx]).next
-        mov (Node PTR [edx]).next, ecx
+    mov edx, ebx                                                    ; EDX = previous node
+    mov ebx, (Node PTR [ebx]).next                                  ; EBX = next node
+    .IF(eax == ecx)                                                 ; reached node to delete ?
+        mov ecx, (Node PTR [ebx]).next                              ; ECX = node after node to be deleted
+        mov (Node PTR [edx]).next, ecx                              ; point previous node to ECX
 
-        push (Node PTR [ebx]).strPtr
+        push (Node PTR [ebx]).strPtr                                ; calculate memory consumption
         call String_length
         inc eax
         sub dMemConsumption, eax
