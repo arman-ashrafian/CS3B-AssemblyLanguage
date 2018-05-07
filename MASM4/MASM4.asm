@@ -263,9 +263,6 @@ AppendStringToLinkedList ENDP
 DeleteStringFromLinkedList PROC
 ; - delete by index
 ;*************************************************
-    
-; TODO: calculate memory consumption to subtract from total
-
     push ebp
     mov ebp, esp
 
@@ -289,6 +286,13 @@ DeleteStringFromLinkedList PROC
     .IF(eax == 0)                                                   ; delete first node
         mov edx, (Node PTR [ebx]).next
         mov head, edx
+
+        push (Node PTR [ebx]).strPtr
+        call String_length
+        inc eax
+        sub dMemConsumption, eax
+        sub dMemConsumption, NODE_SIZE
+
         invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string ptr
         invoke HeapFree, hHeap, 0, ebx                              ; delete node
         dec linkedListCount
@@ -300,6 +304,13 @@ traversalLoop:
     .IF(eax == ecx)
         mov ecx, (Node PTR [ebx]).next
         mov (Node PTR [edx]).next, ecx
+
+        push (Node PTR [ebx]).strPtr
+        call String_length
+        inc eax
+        sub dMemConsumption, eax
+        sub dMemConsumption, NODE_SIZE
+
         invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string ptr
         invoke HeapFree, hHeap, 0, ebx                              ; delete node
         dec linkedListCount
