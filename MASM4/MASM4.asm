@@ -1,9 +1,9 @@
 ;***************************************************************************
-; Program Name: MASM3.asm
+; Program Name: MASM4.asm
 ; Programmer:   Arman Ashrafian
 ; Class:        CS 3B
-; Date:         4-12-2018
-; Purpose:      String Library Driver
+; Date:         5-10-2018
+; Purpose:      Text Editor, store strings in linked list
 ;**************************************************************************
 
 ; Dot Directives
@@ -43,7 +43,7 @@ Node Struct
     next   DWORD ?
 Node Ends
 
-; ------------------------- DATA -----------------------------------
+; ---------------------------------------- DATA -----------------------------------------
 .data
 
 hHeap               HANDLE ?    ; Heap Handle
@@ -79,11 +79,11 @@ fileBuffPtr         DWORD ?
 linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
 
-; ----------------------- CODE -----------------------------
+; -------------------------------------- CODE -------------------------------------------
 .code
-;**********************************************
-; *********** Program Entry Point ************
-;**********************************************
+;*****************************************************************************************
+; ******************************** Program Entry Point ***********************************
+;*****************************************************************************************
 _start:
 
     mov eax, 0                                  ; for OllyDebug
@@ -91,7 +91,7 @@ _start:
     mov hHeap, eax
     mov head, 0                                 ; linked list head points to null
 
-    invoke GetProcessHeap                      ; default heap handle
+    invoke GetProcessHeap                       ; default heap handle
     mov hDefaultHeap, eax
 
 MainLoopWithMenu:
@@ -148,7 +148,15 @@ DeleteString:
     call DeleteStringFromLinkedList
     jmp MainLoopWithMenu
 EditString:
-    ; TODO
+    mWrite "Index: "
+    call ReadDec
+    mov ebx, eax
+    call Crlf
+    mWrite "New String: "
+    mReadString strStringInputBuff
+    push ebx
+    call EditStringByIndex
+    jmp MainLoopWithMenu
 StringSearch:
     ; TODO
 SaveFile:
@@ -160,7 +168,7 @@ InvalidInput:
 Quit:
     invoke ExitProcess, 0
 
-; ------------------------------ Procedures ----------------------------
+; ----------------------------------- PROCEDURES ----------------------------------------
 
 ;**********************************************
 PrintMenu PROC
@@ -476,5 +484,22 @@ GetInputFromClipboard PROC
     pop ebp
     ret
 GetInputFromClipboard ENDP
+
+;*************************************************
+EditStringByIndex PROC
+; - edit string given index #, replace with string
+;   in strStringInputBuff
+;*************************************************
+    push ebp                        ; new stack frame
+    mov ebp, esp
+
+    index equ [ebp+8]               ; param
+
+    ; TODO - make it do its thang
+
+    call WaitMsg
+    pop ebp
+    ret 4
+EditStringByIndex ENDP
 
 end _start ; end program
