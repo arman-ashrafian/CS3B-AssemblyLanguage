@@ -18,6 +18,7 @@ OpenClipboard       PROTO STDCALL :DWORD
 GetClipboardData    PROTO STDCALL :DWORD
 GlobalSize          PROTO STDCALL :DWORD
 CloseClipboard      PROTO STDCALL
+GetProcessHeap      PROTO STDCALL
 
 ; Include Libraries
 INCLUDE ..\..\Irvine\Irvine32.inc  ; Irvine Prototypes
@@ -46,6 +47,7 @@ Node Ends
 .data
 
 hHeap               HANDLE ?    ; Heap Handle
+hDefaultHeap        HANDLE ?    ; Defulat Heap Handle
 
 head 			    DWORD  ?    ; Linked List pointer
 
@@ -84,11 +86,13 @@ dMemConsumption     DWORD 0
 ;**********************************************
 _start:
 
-    mov eax, 0   ; for OllyDebug
+    mov eax, 0                                  ; for OllyDebug
     INVOKE HeapCreate, 0, HEAP_START, HEAP_MAX  ; create heap
-
     mov hHeap, eax
-    mov head, 0     ; head points to null
+    mov head, 0                                 ; linked list head points to null
+
+    invoke GetProcessHeap                      ; default heap handle
+    mov hDefaultHeap, eax
 
 MainLoopWithMenu:
     call PrintMenu
@@ -138,7 +142,11 @@ AddString:
     .ENDIF
     jmp MainLoopWithMenu
 DeleteString:
-    ; TODO
+    mWrite "Index: "
+    call ReadDec
+    push eax
+    call DeleteStringFromLinkedList
+    jmp MainLoopWithMenu
 EditString:
     ; TODO
 StringSearch:
@@ -206,6 +214,8 @@ AppendStringToLinkedList PROC
     push ebx                    ; preserve 
     push edx
 
+    inc linkedListCount         ; increment linked list count
+
     ; args
     string equ [ebp + 8]        ; address of string to append
 
@@ -226,7 +236,6 @@ AppendStringToLinkedList PROC
         mov head, eax
         mov (Node PTR [eax]).strPtr, edx
         mov (Node PTR [eax]).next, 0
-        inc linkedListCount
     .ELSE
         push ebx    ; save registers because HeapAlloc will overwrite
         push edx
@@ -242,7 +251,6 @@ AppendStringToLinkedList PROC
         mov (Node PTR [ebx]).next, eax      ; last node points to new node
         mov (Node PTR [eax]).strPtr, edx    ; new node stores the string
         mov (Node PTR [eax]).next, 0      ; new node points to NULL
-        inc linkedListCount
     .ENDIF
 
     pop edx
@@ -250,6 +258,64 @@ AppendStringToLinkedList PROC
     pop ebp
     ret 4
 AppendStringToLinkedList ENDP
+
+;*************************************************
+DeleteStringFromLinkedList PROC
+; - delete by index
+;*************************************************
+    
+; TODO: calculate memory consumption to subtract from total
+
+    push ebp
+    mov ebp, esp
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    index equ [ebp+8]
+
+    mov eax, index
+    mov ebx, linkedListCount
+    .IF(eax < 0 || eax >= ebx || ebx == 0)  ; check if index is negative,
+        jmp quit                            ; index is bigger than size of list,
+    .ENDIF                                  ; and list is empty
+
+    mov ebx, head
+    mov ecx, 1
+    ; EAX = index, EBX = *head, ECX = counter
+
+    .IF(eax == 0)                                                   ; delete first node
+        mov edx, (Node PTR [ebx]).next
+        mov head, edx
+        invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string ptr
+        invoke HeapFree, hHeap, 0, ebx                              ; delete node
+        dec linkedListCount
+        jmp quit
+    .ENDIF
+traversalLoop:
+    mov edx, ebx
+    mov ebx, (Node PTR [ebx]).next
+    .IF(eax == ecx)
+        mov ecx, (Node PTR [ebx]).next
+        mov (Node PTR [edx]).next, ecx
+        invoke HeapFree, hDefaultHeap, 0, (Node PTR [ebx]).strPtr   ; delete string ptr
+        invoke HeapFree, hHeap, 0, ebx                              ; delete node
+        dec linkedListCount
+        jmp quit
+    .ENDIF
+    inc ecx
+    jmp traversalLoop
+
+quit:
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+    pop ebp
+    ret 4
+DeleteStringFromLinkedList ENDP
 
 ;*************************************************
 DisplayStrings PROC
