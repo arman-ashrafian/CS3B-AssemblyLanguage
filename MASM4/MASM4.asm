@@ -158,7 +158,10 @@ EditString:
     call EditStringByIndex
     jmp MainLoopWithMenu
 StringSearch:
-    ; TODO
+    mWrite "Search: "
+    mReadString strStringInputBuff
+    call SearchForString
+    jmp MainLoopWithMenu
 SaveFile:
     mWrite "Filename: "
     mReadString strFilename
@@ -586,5 +589,113 @@ traversalLoop:
 quit:
     ret
 SaveStringsToFile ENDP
+
+;*************************************************
+SearchForString PROC
+; - traverses linked list and keeps checking if 
+;   string contains the substring in 
+;   strStringInputBuff.
+;*************************************************
+    ;int 3
+    mov eax, 0
+    mov ecx, 0         ; ECX (counter) = 0
+    mov ebx, head      ; EBX = head
+traversalLoop:
+    .IF(ebx == 0)
+        jmp quit
+    .ENDIF
+    push ebx
+    push (Node PTR [ebx]).strPtr
+    push offset strStringInputBuff
+    call StringContains
+    pop ebx
+    .IF(al == 1)
+        mov edx, (Node PTR [ebx]).strPtr
+        call WriteString
+        call Crlf
+    .ENDIF
+    mov ebx, (Node PTR [ebx]).next
+    inc ecx
+    jmp traversalLoop
+quit:
+    call WaitMsg
+    ret
+SearchForString ENDP
+
+;*************************************************
+StringContains PROC
+; - StringContains(string1, string2)
+; - returns bool in AL if string 1 contains 
+;   string 2.
+;*************************************************
+    push ebp                    ; new stack frame
+    mov ebp, esp
+
+    push ebx                    ; preserve registers
+    push ecx
+    push edx
+    push esi
+
+    sub esp, 12                 ; local variables
+    string1Len equ [ebp-4]
+    string2Len equ [ebp-8]
+    lengthDiff equ [ebp-12]
+
+    string1 equ [ebp+12]        ; params
+    string2 equ [ebp+8]
+
+    push string1                ; get string lengths
+    call String_length
+    mov string1Len, eax
+    push string2
+    call String_length
+    mov string2Len, eax
+
+    .IF(string1Len < eax)
+        mov al, 0
+        jmp quit
+    .ENDIF
+
+    mov eax, string1Len
+    sub eax, string2Len
+    mov lengthDiff, eax         ; calc string length difference
+    
+    mov eax, string2Len
+    dec eax
+    mov string2Len, eax         ; substract 1 from string2Len to use as loop stopper
+
+    mov esi, 0                  ; string 1 index
+    mov ecx, 0                  ; string 2 index
+    mov ebx, string1
+    mov edx, string2
+L1:
+    .IF(esi == lengthDiff)
+        mov al, 0
+        jmp quit
+    .ENDIF
+    mov al, [ebx+esi]
+    or al, 00100000b            ; convert to lowercase
+    mov ah, [edx+ecx]
+    or ah, 00100000b            ; convert to lowercase
+    .IF(al != ah)
+        inc esi
+        mov ecx, 0
+    .ELSEIF(ecx == string2Len)
+        mov al, 1
+        jmp quit
+    .ELSE
+        inc esi
+        inc ecx
+    .ENDIF
+    jmp L1
+quit:
+    add esp, 12
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
+    pop ebp
+    ret 8
+StringContains ENDP
 
 end _start ; end program
