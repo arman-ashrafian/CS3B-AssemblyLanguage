@@ -75,6 +75,7 @@ strFilename         BYTE  20 dup(?)
 fileHandle          DWORD ?
 fileSize            DWORD ?
 fileBuffPtr         DWORD ?
+strLinefeed         BYTE  13,10,0
 
 linkedListCount     DWORD 0
 dMemConsumption     DWORD 0
@@ -205,10 +206,18 @@ PromptUser ENDP
 GetInputFromKeyboard PROC
 ; - prompts user for input, appends to linked list
 ;*************************************************
-    mov al, 10
-    call WriteChar
+    call Crlf
     mWrite "Input: "
     mReadString strStringInputBuff
+
+    push offset strStringInputBuff
+    call String_length
+    mov strStringInputBuff[eax], 13
+    inc eax
+    mov strStringInputBuff[eax], 10
+    inc eax
+    mov strStringInputBuff[eax], 0
+
     push offset strStringInputBuff
     call String_copy
     push eax
@@ -439,7 +448,8 @@ innerLoop:
     .IF(al == 13)                       ; reached end of line ?
         add edx, ecx
         inc edx
-        mov strStringInputBuff[ecx],0   ; add null terminator
+        mov strStringInputBuff[ecx],10   ; add carriage return
+        mov strStringInputBuff[ecx+1],0  ; add null
         push offset strStringInputBuff  
         call String_copy                ; copy string into 
         push eax
@@ -580,6 +590,11 @@ traversalLoop:
     mov edx, (Node PTR [ebx]).strPtr
     mov eax, fileHandle
     call WriteToFile
+
+    ; mov ecx, 3
+    ; mov edx, offset strLinefeed
+    ; mov eax, fileHandle
+    ; call WriteToFile
 
     mov ebx, (Node PTR [ebx]).next
     pop ecx                             ; restore counter
