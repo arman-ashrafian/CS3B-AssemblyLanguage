@@ -591,11 +591,6 @@ traversalLoop:
     mov eax, fileHandle
     call WriteToFile
 
-    ; mov ecx, 3
-    ; mov edx, offset strLinefeed
-    ; mov eax, fileHandle
-    ; call WriteToFile
-
     mov ebx, (Node PTR [ebx]).next
     pop ecx                             ; restore counter
     inc ecx
@@ -611,18 +606,19 @@ SearchForString PROC
 ;   string contains the substring in 
 ;   strStringInputBuff.
 ;*************************************************
-    ;int 3
     mov eax, 0
     mov ecx, 0         ; ECX (counter) = 0
     mov ebx, head      ; EBX = head
 traversalLoop:
-    .IF(ebx == 0)
+    .IF(ecx == linkedListCount)
         jmp quit
     .ENDIF
     push ebx
+    push ecx
     push (Node PTR [ebx]).strPtr
     push offset strStringInputBuff
     call StringContains
+    pop ecx
     pop ebx
     .IF(al == 1)
         mov edx, (Node PTR [ebx]).strPtr
@@ -651,10 +647,9 @@ StringContains PROC
     push edx
     push esi
 
-    sub esp, 12                 ; local variables
+    sub esp, 8                 ; local variables
     string1Len equ [ebp-4]
     string2Len equ [ebp-8]
-    lengthDiff equ [ebp-12]
 
     string1 equ [ebp+12]        ; params
     string2 equ [ebp+8]
@@ -670,12 +665,7 @@ StringContains PROC
         mov al, 0
         jmp quit
     .ENDIF
-
-    mov eax, string1Len
-    sub eax, string2Len
-    mov lengthDiff, eax         ; calc string length difference
     
-    mov eax, string2Len
     dec eax
     mov string2Len, eax         ; substract 1 from string2Len to use as loop stopper
 
@@ -684,7 +674,7 @@ StringContains PROC
     mov ebx, string1
     mov edx, string2
 L1:
-    .IF(esi == lengthDiff)
+    .IF(esi == string1Len)
         mov al, 0
         jmp quit
     .ENDIF
@@ -704,7 +694,7 @@ L1:
     .ENDIF
     jmp L1
 quit:
-    add esp, 12
+    add esp, 8
     pop esi
     pop edx
     pop ecx
